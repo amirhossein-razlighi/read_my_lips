@@ -3,7 +3,7 @@
 Code for **Read My Lips: Context-aware Lip Reading Using Language and Audio-Visual Models** (arXiv
 [2611.33117](https://arxiv.org/abs/2611.33117)).
 
-**[Project page](https://amirhossein-razlighi.github.io/read_my_lips/)** · **[Paper](https://arxiv.org/abs/2611.33117)**
+**[Project page](https://amirhossein-razlighi.github.io/read_my_lips/)** · **[Paper](https://arxiv.org/abs/2611.33117)** · **[Checkpoints](https://huggingface.co/AmirHossein-razlighi/read-my-lips)** · **[Data](https://huggingface.co/datasets/AmirHossein-razlighi/read-my-lips-data)**
 
 Read My Lips (RML) recovers speech that was silenced or buried in noise. Three models communicate through plain text:
 a lip reader **R** (Auto-AVSR) proposes the 10 best transcripts of the whole clip, a language model **L** (Gemma-4 12B
@@ -27,6 +27,7 @@ git clone <this repository> read_my_lips && cd read_my_lips
 uv sync --extra roi                      # Python 3.12, torch 2.9.1 (CUDA 12.8), packages/, dlib
 bash scripts/fetch_third_party.sh        # Auto-AVSR, the mouth-ROI recipe and the other readers at pinned commits
 bash scripts/download_checkpoints.sh     # checkpoints -> checkpoints/ (docs/CHECKPOINTS.md)
+bash scripts/download_data.sh            # test sets and our outputs -> data/read-my-lips-data (gated: request access)
 cp configs/paths.example.yaml configs/paths.yaml   # edit if your checkpoints live elsewhere
 ```
 Details, including the dlib build for the mouth crops: [docs/INSTALL.md](docs/INSTALL.md).
@@ -44,19 +45,24 @@ force the task with `--task denoise`. One 80 GB GPU. See [docs/INFERENCE.md](doc
 ## Evaluate
 
 `benchmarks/` holds the test sets of the paper as text manifests (ids, source videos and window starts, silenced
-spans, reviewed references; no media). `scripts/run_benchmark.py` runs the pipeline on one of them and
-`scripts/make_tables.py` regenerates Tab. 2, 3, 4, 5a, 5b and Fig. 4 from the per-sample results, including the rows with
-USR 2.0 as the lip reader (`--reader usr2`) and the Spanish and French set. See
+spans, reviewed references). Their media (face windows, corrupted inputs, clean references), our selected outputs and
+our per-sample results are in the gated dataset
+[read-my-lips-data](https://huggingface.co/datasets/AmirHossein-razlighi/read-my-lips-data)
+(`bash scripts/download_data.sh`). `scripts/run_benchmark.py` runs the pipeline on one of them and
+`scripts/make_tables.py` regenerates Tab. 2, 3, 4, 5a, 5b and Fig. 4 from the per-sample results (yours, or ours from
+the dataset), including the rows with USR 2.0 as the lip reader (`--reader usr2`) and the Spanish and French set. See
 [docs/EVALUATION.md](docs/EVALUATION.md).
 
 ## Training
 
-The three training stages of G and the fine-tuning of L are described in [docs/TRAINING.md](docs/TRAINING.md).
+The three training stages of G and the fine-tuning of L are described in [docs/TRAINING.md](docs/TRAINING.md); the
+training data is in the `train/` part of the same dataset (`bash scripts/download_data.sh train`).
 
 ## Checkpoints
 
-[docs/CHECKPOINTS.md](docs/CHECKPOINTS.md) lists every checkpoint: ours (L and the LoRAs of G, on Hugging Face) and
-the third-party models (LTX-2.5, Gemma-4, Auto-AVSR, Whisper large-v3, dlib, MediaPipe).
+[docs/CHECKPOINTS.md](docs/CHECKPOINTS.md) lists every checkpoint: ours (L and the LoRAs of G, on Hugging Face:
+[AmirHossein-razlighi/read-my-lips](https://huggingface.co/AmirHossein-razlighi/read-my-lips)) and the third-party
+models (LTX-2.5, Gemma-4, Auto-AVSR, Whisper large-v3, dlib, MediaPipe).
 
 ## Citation
 

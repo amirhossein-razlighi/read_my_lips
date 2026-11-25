@@ -52,16 +52,24 @@ Everything comes from TalkVid (English, Spanish and French) in 4.8 s windows of 
 
 ### What this release ships and what you must build
 
-The raw data cannot be redistributed: the videos, latents and features are not included. What is shipped:
+The training data is in the `train/` part of the gated dataset
+[AmirHossein-razlighi/read-my-lips-data](https://huggingface.co/datasets/AmirHossein-razlighi/read-my-lips-data)
+(`bash scripts/download_data.sh train` downloads it to `data/read-my-lips-data/train/`, checks the sha256 sums and
+unpacks the windows). Latents and Gemma condition tensors are not shipped: the data steps below rebuild them.
 
-| Item | Status |
+| Item | Where |
 |---|---|
-| G stage-1 cut list with silenced spans and the **exact condition text** of each cut | shipped: `rml/training/manifests/generator_stage1_cuts.json.gz` (15,816 cuts) |
-| G multi-task samples: inpaint/denoise, source cut, noise type, SNR, second source, and the candidate texts | shipped: `rml/training/manifests/generator_multitask_samples.json.gz` (13,018 samples) |
-| Noise-bank sources: DEMAND channels, VGGSound clip ids per split | shipped: `rml/training/manifests/noise_bank_sources.json` |
+| G training windows: the 6,509 TalkVid windows (4.8 s, 768 x 512, 25 fps, with their audio) behind the stage-1 cuts and the multi-task samples | `train/generator/windows-*.tar` (file list per shard `windows-*.txt`, `SHA256SUMS`), unpacked to `train/generator/windows/<base_id>.mp4` |
+| G stage-1 cut list with silenced spans and the **exact condition text** of each cut (15,816 cuts) | `rml/training/manifests/generator_stage1_cuts.json.gz` (copy: `train/generator/stage1_cuts.json.gz`) |
+| G multi-task samples: inpaint/denoise, source cut, noise type, SNR, second source, and the candidate texts (13,018 samples) | `rml/training/manifests/generator_multitask_samples.json.gz` (copy: `train/generator/multitask_samples.json.gz`) |
+| Noise bank, training split (DEMAND PCAFETER channels 1-12, the 9 seen VGGSound classes, colored noise) | `train/noise_bank/` (`index.json` + `<type>_train.npy`): use it as `RML_NOISE_BANK`; sources in `rml/training/manifests/noise_bank_sources.json` |
+| L training rows (6,792 English windows, 66,186 cuts) and their reader n-best files | `train/lm/` |
 | Scripts that run the scripted steps | `rml/training/*.py` (table below) |
-| L training rows (6,792 English windows, 66,186 cuts) | built with `build_vis2gemma_data.py`, then filtered to English, deduplicated and cleared of test videos |
-| G stage-1 root: window mining, merge of two mining generations, purge of bad windows, dedup, test-video removal | the cut manifest above lists exactly the training cuts: build the latents of those cuts |
+
+A cut is a window plus its silenced span: every cut of a window uses the same window video. To lay out
+`RML_G_STAGE1_ROOT`, link `clips/<cut id>.mp4` to `windows/<base_id>.mp4` for every cut of the manifest
+(`base_id` is the cut id without its `__k<k>` suffix), then run the steps below. The test and validation videos of the
+paper are not in the training data (no YouTube id in common with `benchmarks/`).
 
 ### Data steps
 
@@ -83,6 +91,9 @@ The raw data cannot be redistributed: the videos, latents and features are not i
    - `build_k10_train_subset.py` draws these cuts; their ids are in `rml/training/manifests/generator_stage1_cuts.json.gz`.
 
 **G noise bank: `RML_NOISE_BANK`**
+
+The released `train/noise_bank/` is this bank's training split; steps 3-4 rebuild the whole bank (with the test split
+the noisy test sets were mixed from).
 
 3. Fetch the sound-effect clips: `fetch_vggsound_sfx.py --csv vggsound.csv --out <sfx>`. YouTube availability changes, so check the result against `noise_bank_sources.json`.
 4. `build_noise_bank.py --out $RML_NOISE_BANK --pcafeter <DEMAND>/PCAFETER --sfx-manifest <sfx>/manifest.json` builds:

@@ -6,9 +6,12 @@ USR 2.0 as R (<benchmark>.usr2.json, scripts/run_benchmark.py --reader usr2) giv
 Tab. 2 and 3.
 
   python scripts/make_tables.py --results outputs/results [--out outputs/tables.txt]
-Results files: <results>/<benchmark>.json for the benchmarks of benchmarks/index.json that were run
+Results files: <results>/<benchmark>.json (written by scripts/run_benchmark.py) or <results>/<benchmark>/results.json
+(the rml_outputs/ directory of the Read My Lips data: our per-sample results, so
+`--results data/read-my-lips-data/rml_outputs` regenerates our rows), for the benchmarks of benchmarks/index.json
 (silenced_talkvid_en, silenced_voxmm, silenced_hard_en, noisy_talkvid_en, noisy_voxmm, noisy_hard_en,
-grid_talkvid_en, grid_voxmm, silenced_talkvid_esfr) and <results>/<benchmark>.usr2.json; missing ones are skipped.
+grid_talkvid_en, grid_voxmm, silenced_talkvid_esfr) and <results>/<benchmark>.usr2.json (or
+<results>/<benchmark>/results.usr2.json); missing ones are skipped.
 Baseline transcripts: <results>/<benchmark>.baselines.json.
 """
 import argparse
@@ -26,6 +29,8 @@ READERS = (("", "R = Auto-AVSR"), (".usr2", "R = USR 2.0"))
 
 def load(results, bench, name, reader=""):
     p = results / f"{name}{reader}.json"
+    if not p.exists():                     # the layout of the data's rml_outputs/: <name>/results<reader>.json
+        p = results / name / f"results{reader}.json"
     if not p.exists():
         return None, None, None
     b = results / f"{name}.baselines.json"
