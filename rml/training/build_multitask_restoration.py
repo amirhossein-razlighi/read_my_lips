@@ -42,7 +42,7 @@ from tqdm import tqdm
 sys.path.insert(0, str(Path(__file__).resolve().parent))   # audio_latents.py
 
 # Paths: set from the command line in main() (defaults from the RML_* environment variables, see docs/TRAINING.md).
-SRC: Path       # the stage-1 train root (talkvid_mt_span/train)
+SRC: Path       # the stage-1 train root ($RML_G_STAGE1_ROOT)
 BANK: Path      # the noise bank (build_noise_bank.py --out)
 OUT: Path       # the multi-task root's parent dir; the train root is OUT / "train"
 CASCADE_TEXTS: Path
@@ -290,7 +290,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("stage", choices=["train", "native-texts", "link-denoise", "text-conds", "train-wavs"])
     ap.add_argument("--src-root", type=Path, default=env("RML_G_STAGE1_ROOT"),
-                    help="stage-1 train root (talkvid_mt_span/train); default $RML_G_STAGE1_ROOT")
+                    help="stage-1 train root; default $RML_G_STAGE1_ROOT")
     ap.add_argument("--out-root", type=Path, default=env("RML_G_MULTITASK_DIR"),
                     help="parent of the multi-task train root; default $RML_G_MULTITASK_DIR")
     ap.add_argument("--noise-bank", type=Path, default=env("RML_NOISE_BANK"), help="default $RML_NOISE_BANK")

@@ -43,7 +43,7 @@ def main():
     ap.add_argument("--per-k", type=int, default=2000)
     ap.add_argument("--shards", type=int, default=24)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--root", type=Path, required=True, help="the generator train root (talkvid_mt_span/train)")
+    ap.add_argument("--root", type=Path, required=True, help="the generator stage-1 train root")
     ap.add_argument("--proposer-dir", type=Path, required=True,
                     help="dir of the proposer rows train.jsonl (whisper context with ___), build_vis2gemma_data.py")
     ap.add_argument("--exclude-ytids", type=Path, required=True,
