@@ -31,7 +31,7 @@ def root_rows(bench, rows):
         base = {"id": r["id"], "clip": f"clips/{r['base_id']}.mp4", "base_id": r["base_id"],
                 "language": r.get("language", "en")}
         if bench.startswith("silenced"):
-            # the reference span words feed only the audible-context leak guard (as in the paper's runs)
+            # the reference span words feed the audible-context leak guard
             out.append({**base, "task": "inpaint", "mask_segments_s": r["mask_segments_s"],
                         "masked_words": r["masked_words"]})
         elif bench.startswith("noisy"):

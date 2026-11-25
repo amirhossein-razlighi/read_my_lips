@@ -57,4 +57,4 @@ speech has no evidence and neither votes nor can be selected. Ties go to the ear
 The reader is replaceable without retraining (Sec. 5.5): any recogniser that writes the 10 best transcripts per window
 into `<out>/root/rml/reader_vsr.json` (`{"rows": [{"id": <window>, "nbest": [...]}]}`) can stand in for Auto-AVSR;
 run the remaining stages with `--stages whisper,lm,texts,encode,render,transcribe,evidence,select` after the
-`latents,roi,reader` stages (the audio-visual n-best and the visual evidence stay Auto-AVSR, as in the paper).
+`latents,roi,reader` stages (the audio-visual n-best and the visual evidence stay Auto-AVSR).

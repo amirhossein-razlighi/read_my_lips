@@ -17,8 +17,15 @@ import numpy as np
 import soundfile as sf
 import torch
 
-from rml.data.audio_video import (apply_mute_mask, audio_vae_and_processor, encode_video, encode_waveform,
-                                  extract_video_frames, load_audio_window, resample)
+from rml.data.audio_video import (
+    apply_mute_mask,
+    audio_vae_and_processor,
+    encode_video,
+    encode_waveform,
+    extract_video_frames,
+    load_audio_window,
+    resample,
+)
 
 DIRS = ("latents", "audio_latents", "noisy_audio_latents", "reference_latents", "inputs_16k")
 SR16 = 16_000
@@ -85,3 +92,19 @@ def encode_root(root: Path, video_vae_path, audio_vae_path, device=None) -> None
             y16 = apply_mute_mask(load_audio_window(clip, 0.0, SR16), SR16, [tuple(s) for s in row["mask_segments_s"]], 10.0)
         sf.write(wav16, y16, SR16)
         print(f"[latents] {sid}", flush=True)
+
+
+def main() -> None:
+    import argparse
+
+    from rml.paths import load_paths
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--root", type=Path, required=True, help="dir with metadata.json (rows: id, clip, base_id, task, mask_segments_s)")
+    ap.add_argument("--paths", default=None)
+    a = ap.parse_args()
+    P = load_paths(a.paths)
+    encode_root(a.root, P.ltx_video_vae, P.ltx_audio_vae)
+
+
+if __name__ == "__main__":
+    main()

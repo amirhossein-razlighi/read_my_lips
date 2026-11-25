@@ -111,7 +111,7 @@ class AutoAVSR:
 
 
 def read_rows(rows, auto_avsr_dir, ckpt, mode="vsr", nbest=10, beam_size=40, degrade="", device="cuda"):
-    """n-best for every row; rows whose ROI is missing are skipped (as the paper's runs)"""
+    """n-best for every row; rows whose ROI is missing are skipped"""
     r = AutoAVSR(auto_avsr_dir, ckpt, mode, beam_size, device)
     out = []
     for row in rows:

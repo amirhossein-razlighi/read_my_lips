@@ -14,7 +14,7 @@ dependencies = [
     "torchaudio==2.9.1",
     "torchvision==0.24.1",
     "torchcodec>=0.9,<0.10",
-    "transformers>=5.14,<6",
+    "transformers>=5.8,<5.15",          # the range ltx-core supports
     "peft>=0.19",
     "safetensors>=0.8",
     "optimum-quanto>=0.2.7",
@@ -32,6 +32,10 @@ dependencies = [
     "pytorch-lightning>=2.6",
     "omegaconf>=2.3",
     "sentencepiece>=0.2",
+    # L trainer and the training data builders (docs/TRAINING.md); nltk also needs `python -m nltk.downloader cmudict`
+    "tensorboard>=2.20",
+    "nltk>=3.9",
+    "g2p-en>=2.1",
 ]
 
 [project.optional-dependencies]
@@ -72,10 +76,13 @@ extend-exclude = ["packages", "third_party"]
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "C4", "PIE", "RUF"]
 # SIM115 / C405 / RUF005 / E702: style of code kept as it ran for the paper
-ignore = ["E741", "B905", "RUF001", "RUF002", "RUF003", "SIM108", "B023", "SIM115", "C405", "RUF005", "E702"]
+ignore = ["E741", "B905", "RUF001", "RUF002", "RUF003", "SIM108", "B023", "SIM115", "C405", "RUF005", "E702", "RUF100", "RUF046"]
 
 [tool.ruff.lint.per-file-ignores]
 "rml/eval/span_rules.py" = ["E501"]
+# training code kept as it ran for the paper (flat sibling imports after sys.path edits: import order matters)
+"rml/training/*" = ["I001", "C408", "E701", "UP037", "E501", "RUF059", "SIM300"]
+"scripts/train/*" = ["I001", "C408", "E701", "UP037", "E501", "RUF059", "SIM300"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["rml", "ltx_core", "ltx_pipelines", "ltx_trainer"]
