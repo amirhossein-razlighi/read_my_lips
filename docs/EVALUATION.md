@@ -38,7 +38,7 @@ bash scripts/download_data.sh             # test_sets/ and rml_outputs/ -> data/
 | `rml_outputs/<benchmark>/results.json` | our per-sample results in the format of `scripts/make_tables.py` |
 | `rml_outputs/<benchmark>/results.usr2.json` | the same with USR 2.0 as the lip reader (silenced and noisy TalkVid and VoxMM) |
 
-`<benchmark>` is a name of `benchmarks/index.json` (the validation set is not included). The Spanish and French set has its results (R, R -> L, R -> L -> G) but no audio in `rml_outputs/`. Without the data, rebuild each
+`<benchmark>` is a name of `benchmarks/index.json` (the validation set is not included). For the Spanish and French set (no selection) `rml_outputs/` holds the R -> L -> G audio and the R, R -> L and R -> L -> G results. Without the data, rebuild each
 face window from its source clip (TalkVid, VoxMM; the hard set's scenes) with
 `rml.data.windows.make_window(source, window_start_s, out)` into a directory of `<base_id>.mp4` and pass it as
 `--windows`; noisy inputs and the grid's babble are then mixed deterministically from the test split of the noise bank

@@ -6,7 +6,7 @@ run_name: gemma_select_or_write_novis
 init_from: null   # --init-from (ignored when resuming from <out>/last.pt)
 args:
   data: "${RML_LM_STAGE12_DATA}"
-  keep-meta: "${RML_G_STAGE1_ROOT}/metadata.json"
+  keep-meta: "${RML_LM_STAGE12_DATA}/keep_meta.json"
   select-write: true
   aux-max-new: 64
   lr-adapter: 2.0e-4

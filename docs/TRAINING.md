@@ -34,7 +34,7 @@ Configs contain `${RML_*}` placeholders. The launchers fill them from the enviro
 |---|---|
 | `RML_LTX_DIR` | LTX-2.5 split-pack directory |
 | `RML_OUT_DIR` | where every run writes `<RML_OUT_DIR>/<run name>/` |
-| `RML_G_STAGE1_ROOT` | G stage-1 data root (`talkvid_mt_span/train`) |
+| `RML_G_STAGE1_ROOT` | G stage-1 data root (one `clips/<cut id>.mp4` per cut, see below) |
 | `RML_G_MULTITASK_DIR` | parent of the multi-task root. `RML_G_MULTITASK_ROOT` = `$RML_G_MULTITASK_DIR/train` |
 | `RML_NOISE_BANK`, `RML_LTX_AUDIO_VAE` | noise bank directory; LTX-2.5 audio VAE file |
 | `RML_LM_STAGE12_DATA`, `RML_LM_STAGE3_DATA` | L rows for stages 1–2 and for stage 3 |
@@ -63,7 +63,7 @@ unpacks the windows). Latents and Gemma condition tensors are not shipped: the d
 | G stage-1 cut list with silenced spans and the **exact condition text** of each cut (15,816 cuts) | `rml/training/manifests/generator_stage1_cuts.json.gz` (copy: `train/generator/stage1_cuts.json.gz`) |
 | G multi-task samples: inpaint/denoise, source cut, noise type, SNR, second source, and the candidate texts (13,018 samples) | `rml/training/manifests/generator_multitask_samples.json.gz` (copy: `train/generator/multitask_samples.json.gz`) |
 | Noise bank, training split (DEMAND PCAFETER channels 1-12, the 9 seen VGGSound classes, colored noise) | `train/noise_bank/` (`index.json` + `<type>_train.npy`): use it as `RML_NOISE_BANK`; sources in `rml/training/manifests/noise_bank_sources.json` |
-| L training rows (6,792 English windows, 66,186 cuts) and their reader n-best files | `train/lm/` |
+| L training rows (6,792 English windows, 66,186 cuts; stage 3 adds 4,901 denoise rows), their reader n-best files, reference metadata and feature lengths | `train/lm/` (`train/lm/README.md`): `python scripts/train/prepare_lm_data.py --lm data/read-my-lips-data/train/lm --out data/lm_train` lays them out for the configs and prints the `RML_LM_*` and `RML_AVH_FEATS` variables, so steps 9-13 can be skipped |
 | Scripts that run the scripted steps | `rml/training/*.py` (table below) |
 
 A cut is a window plus its silenced span: every cut of a window uses the same window video. To lay out
@@ -130,7 +130,7 @@ the noisy test sets were mixed from).
 
    Each file has the format `{rows: [{id, nbest}]}`, keyed by window or cut id.
 10. Whisper context on the **muted** audio, with `___` at the detected silence: `python -m rml.data.context --root <root>` (rml/data/context.py, the inference code). This gives `conditions_span/_provenance.json` in the stage-1 root.
-11. `build_vis2gemma_data.py --root $RML_G_STAGE1_ROOT --feats $RML_AVH_FEATS --out $RML_LM_STAGE12_DATA --split train --language en --val-videos 8` writes `train.jsonl` / `val.jsonl`.
+11. `build_vis2gemma_data.py --root $RML_G_STAGE1_ROOT --feats $RML_AVH_FEATS --out $RML_LM_STAGE12_DATA --split train --language en --val-videos 8` writes `train.jsonl` / `val.jsonl`; keep the English rows and copy the cut metadata of their ids to `$RML_LM_STAGE12_DATA/keep_meta.json` (`{"clips": [...]}`, the labels' reference).
 
 **L stage 3: `RML_LM_STAGE3_DATA`**
 
@@ -157,7 +157,7 @@ The features are AV-HuBERT features of the `python -m rml.reader.roi` mouth crop
 ## L: the language model (3 stages)
 
 ```
-GEMMA_ROOT=… RML_OUT_DIR=… RML_LM_STAGE12_DATA=… RML_LM_STAGE3_DATA=… RML_LM_READERS=… RML_G_STAGE1_ROOT=… \
+GEMMA_ROOT=… RML_OUT_DIR=… RML_LM_STAGE12_DATA=… RML_LM_STAGE3_DATA=… RML_LM_READERS=… \
 python scripts/train/train_lm.py configs/training/lm_stage1_select_or_write.yaml
 python scripts/train/train_lm.py configs/training/lm_stage2_select_then_edit.yaml
 python scripts/train/train_lm.py configs/training/lm_stage3_multitask_denoise.yaml   # L = ckpt_s01000.pt
