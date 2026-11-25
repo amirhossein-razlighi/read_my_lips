@@ -1,0 +1,40 @@
+# Where checkpoints and data live. Copy to configs/paths.yaml and edit (configs/paths.yaml is git-ignored).
+# Relative paths are resolved against the repository root. Every key can be overridden by an environment
+# variable RML_<KEY> (for example RML_LTX_TRANSFORMER=/data/ltx/transformer.safetensors).
+
+# LTX-2.5 (Lightricks) split pack
+ltx_transformer: checkpoints/ltx-2.5/diffusion_models/ltx-2.5-22b-dev-transformer-bf16.safetensors
+ltx_text_encoder: checkpoints/ltx-2.5/text_encoders/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors
+ltx_audio_vae: checkpoints/ltx-2.5/vae/ltx-2.5-audio-vae-bf16.safetensors
+ltx_video_vae: checkpoints/ltx-2.5/vae/ltx-2.5-video-vae-bf16.safetensors
+
+# Read My Lips checkpoints (docs/CHECKPOINTS.md)
+lm_checkpoint: checkpoints/read_my_lips/lm/ckpt_s01000.pt                       # L: Gemma-4 LoRA, select-then-edit
+g_main_lora: checkpoints/read_my_lips/g_multitask_text/lora_weights_step_02000.safetensors
+g_cascade_lora: checkpoints/read_my_lips/g_vsr_cascade/lora_weights_step_05000.safetensors
+g_restoration_lora: checkpoints/read_my_lips/g_multitask_restoration/lora_weights_step_03000.safetensors
+
+# Gemma-4 12B (base of L and of the language score)
+gemma_dir: checkpoints/gemma-4-12B-it-qat-q4_0-unquantized
+
+# R: Auto-AVSR (code: third_party/auto_avsr, scripts/fetch_third_party.sh)
+auto_avsr_dir: third_party/auto_avsr
+auto_avsr_vsr: checkpoints/auto_avsr/vsr_trlrwlrs2lrs3vox2avsp_base.pth
+auto_avsr_avsr: checkpoints/auto_avsr/avsr_trlrwlrs2lrs3vox2avsp_base.pth
+
+# mouth ROI preparation (dlib; code: third_party/av_hubert)
+roi_prep_dir: third_party/av_hubert/avhubert/preparation
+dlib_face_predictor: checkpoints/dlib/shape_predictor_68_face_landmarks.dat
+dlib_cnn_detector: checkpoints/dlib/mmod_human_face_detector.dat
+mean_face: checkpoints/dlib/20words_mean_face.npy
+# face window cropping (MediaPipe face landmarker)
+face_landmarker: checkpoints/mediapipe/face_landmarker.task
+
+# Whisper large-v3: WhisperX (faster-whisper + wav2vec2 alignment) for transcripts, the HF model for evidence
+whisperx_dir: checkpoints/whisperx
+whisper_hf_dir: checkpoints/whisper-large-v3
+torch_home: checkpoints/torch            # torch hub cache holding snakers4_silero-vad_master
+
+# evaluation data
+data_root: data                          # benchmark roots are built under <data_root>/<benchmark>
+noise_bank: data/noise_bank              # index.json + <type>_<split>.npy
