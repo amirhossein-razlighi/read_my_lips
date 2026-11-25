@@ -66,9 +66,8 @@ def load_asr_model(model_size: str = "large-v3", device: str | None = None):
 
     torch.hub.load = _load_hub_offline
 
-    import whisperx
-
-    import rml.eval.torchaudio_compat  # noqa: F401  (must precede whisperx)
+    import rml.eval.torchaudio_compat  # noqa: F401, I001  (must precede whisperx)
+    import whisperx  # isort: skip
 
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"

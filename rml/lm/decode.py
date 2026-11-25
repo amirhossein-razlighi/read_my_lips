@@ -27,9 +27,8 @@ EXPECTED_ARGS = {"evidence": "none", "select_edit": True, "chat_wrap": True, "ga
 def load_gemma(gemma_dir, device="cuda"):
     from transformers import AutoModelForCausalLM, AutoTokenizer
     tok = AutoTokenizer.from_pretrained(gemma_dir)
-    kw = {"torch_dtype": torch.bfloat16}
-    if os.environ.get("GEMMA_ATTN"):     # "eager" for bitwise-reproducible decoding
-        kw["attn_implementation"] = os.environ["GEMMA_ATTN"]
+    # eager attention, as L was trained and decoded (sdpa shifts the select-then-edit beam); GEMMA_ATTN overrides
+    kw = {"torch_dtype": torch.bfloat16, "attn_implementation": os.environ.get("GEMMA_ATTN", "eager")}
     try:
         model = AutoModelForCausalLM.from_pretrained(gemma_dir, **kw).to(device).eval()
     except Exception:

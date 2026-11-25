@@ -53,6 +53,8 @@ def context_or_placeholder(muted, s, e, forbid, sid, language="en"):
     """build_context, degrading to a bare placeholder when Whisper fails (never crash a batch)"""
     try:
         return build_context(muted, s, e, forbid, sid, language=language)
+    except (ImportError, OSError):     # a missing model or package is a setup error, not a failed sample
+        raise
     except Exception as ex:  # noqa: BLE001
         print(f"{sid}: whisper failed ({ex!r}) -> bare placeholder", flush=True)
         return "___"

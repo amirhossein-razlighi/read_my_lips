@@ -26,6 +26,9 @@ def load_readers(path) -> dict:
 
 
 def readings_for(r: dict, readers: dict) -> list:
+    """the readings of a row: keyed by its own id (the pipeline), else by its window (ids may carry __k<N>)"""
+    if r["id"] in readers:
+        return readers[r["id"]]
     w = r["id"].rsplit("__k", 1)[0]
     return readers.get(w) or readers.get(str(r.get("feats", "")).rsplit("/", 1)[-1][:-4]) or []
 

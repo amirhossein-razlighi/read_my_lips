@@ -33,7 +33,7 @@ class Paths:
     def export_env(self) -> None:
         """environment read by the ASR and generator modules"""
         os.environ.setdefault("RML_WHISPERX_DIR", str(self.whisperx_dir))
-        os.environ.setdefault("TORCH_HOME", str(self.torch_home))
+        os.environ["TORCH_HOME"] = str(self.torch_home)   # the configured cache wins over a global TORCH_HOME
         os.environ.setdefault("HF_HUB_OFFLINE", "1")
         os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
         os.environ.setdefault("PYTORCH_ALLOC_CONF", "expandable_segments:True")

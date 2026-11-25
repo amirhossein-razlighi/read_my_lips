@@ -57,6 +57,7 @@ def main():
     ap.add_argument("--results", type=Path, required=True)
     ap.add_argument("--recipe", choices=["tables", "hard", "grid"], default=None)
     ap.add_argument("--stages", default=",".join(STAGES))
+    ap.add_argument("--ids", default=None, help="comma list of sample ids: run only these (a quick check)")
     ap.add_argument("--paths", default=None)
     a = ap.parse_args()
     P = load_paths(a.paths)
@@ -64,6 +65,9 @@ def main():
     recipe = a.recipe or ("grid" if a.benchmark.startswith("grid") else "hard" if a.benchmark.endswith("hard_en")
                           else "tables")
     rows = [json.loads(line) for line in (REPO / "benchmarks" / f"{a.benchmark}.jsonl").read_text().splitlines() if line]
+    if a.ids:
+        keep = set(a.ids.split(","))
+        rows = [r for r in rows if r["id"] in keep]
     root = a.work
     (root / "clips").mkdir(parents=True, exist_ok=True)
     meta = root_rows(a.benchmark, rows)
