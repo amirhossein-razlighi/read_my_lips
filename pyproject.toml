@@ -21,7 +21,7 @@ dependencies = [
     "accelerate>=1.14",
     "whisperx>=3.7.2",
     "mediapipe>=0.10.35",
-    "opencv-python>=4.10",
+    "opencv-python>=4.10,<4.13",        # 4.13+ decode the H.264 windows differently (the mouth ROIs move)
     "soundfile>=0.13.1",
     "librosa>=0.10",
     "scipy>=1.14",
@@ -32,6 +32,7 @@ dependencies = [
     "pytorch-lightning>=2.6",
     "omegaconf>=2.3",
     "sentencepiece>=0.2",
+    "six>=1.16",
     # L trainer and the training data builders (docs/TRAINING.md); nltk also needs `python -m nltk.downloader cmudict`
     "tensorboard>=2.20",
     "nltk>=3.9",
@@ -40,7 +41,7 @@ dependencies = [
 
 [project.optional-dependencies]
 # mouth-ROI preparation (dlib needs cmake and a C++ compiler to build)
-roi = ["dlib>=19.24"]
+roi = ["dlib>=19.24", "scikit-image>=0.24"]   # scikit-image: the mean-face warp of align_mouth.py
 
 [dependency-groups]
 dev = ["pytest~=9.0", "ruff>=0.15"]
@@ -56,6 +57,8 @@ members = ["packages/ltx-core", "packages/ltx-pipelines", "packages/ltx-trainer"
 [tool.uv]
 # the release is tested on Linux with CUDA 12.8 drivers
 environments = ["sys_platform == 'linux'"]
+# mediapipe pulls opencv-contrib-python, which also provides cv2: keep it in the same range
+constraint-dependencies = ["opencv-contrib-python<4.13"]
 
 [[tool.uv.index]]
 name = "pypi"

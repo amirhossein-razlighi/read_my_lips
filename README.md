@@ -24,7 +24,7 @@ on the noisy hard set, where it also hears the noisy audio.
 
 ```bash
 git clone <this repository> read_my_lips && cd read_my_lips
-uv sync                                  # Python 3.12, torch 2.9.1 (CUDA 12.8), the LTX-2 packages in packages/
+uv sync --extra roi                      # Python 3.12, torch 2.9.1 (CUDA 12.8), packages/, dlib
 bash scripts/fetch_third_party.sh        # Auto-AVSR and the mouth-ROI recipe at the pinned commits
 bash scripts/download_checkpoints.sh     # checkpoints -> checkpoints/ (docs/CHECKPOINTS.md)
 cp configs/paths.example.yaml configs/paths.yaml   # edit if your checkpoints live elsewhere
