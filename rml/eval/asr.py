@@ -153,3 +153,22 @@ def transcribe_file(path, language: str = "en") -> str:
     import librosa
     y, sr = librosa.load(str(path), sr=None, mono=True)
     return transcribe_16k(librosa.resample(y, orig_sr=sr, target_sr=16000) if sr != 16000 else y, language=language)
+
+
+def transcribe_file_words(path, language: str = "en") -> str:
+    """the aligned words of a wav file joined (resampled to 16 kHz with torchaudio), the span scorer's transcript of
+    the silenced renders; Whisper's segment text if the alignment fails"""
+    import soundfile as sf
+    import torch
+    import torchaudio.functional as AF
+    y, sr = sf.read(str(path), dtype="float32")
+    if y.ndim == 2:
+        y = y.mean(axis=1)
+    if sr != 16000:
+        y = AF.resample(torch.from_numpy(y), sr, 16000).numpy()
+    y = np.ascontiguousarray(y)
+    try:
+        return " ".join(w["word"] for w in transcribe_words_16k(y, language=language))
+    except Exception as e:  # noqa: BLE001
+        print(f"[asr] alignment failed ({e}): segment text", flush=True)
+        return transcribe_16k(y, language=language)

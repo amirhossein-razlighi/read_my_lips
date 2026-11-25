@@ -49,6 +49,7 @@ CONFIGS = {
     "mute_av": ("av_only|mute", "muted", "g_main_lora", 5.0),
 }
 SINGLE_LORA = {"inp_lip": "g_main_lora", "den_av": "g_main_lora"}   # recipes hard and grid
+SPAN_SCORED = ("inp_gemma", "inp_lip")   # recipe tables: transcribed as the span scorer does (Pipeline.transcribe)
 RECIPES = ("tables", "hard", "grid")
 STAGES = ("latents", "roi", "reader", "whisper", "lm", "texts", "encode", "render", "transcribe", "evidence", "select")
 
@@ -250,14 +251,17 @@ class Pipeline:
                        audio_vae_path=self.P.ltx_audio_vae, text_cfg=cfg, steps=30, seed=42)
 
     def transcribe(self):
-        from rml.eval.asr import transcribe_file
+        """Whisper on every render; recipe tables: the silenced renders with L's or R's text through the span
+        scorer's path (torchaudio resampling, aligned words joined)"""
+        from rml.eval.asr import transcribe_file, transcribe_file_words
         res = self.jload("transcripts.json", {})
         for name in CONFIGS:
             d = self.work / "renders" / name
+            fn = transcribe_file_words if self.recipe == "tables" and name in SPAN_SCORED else transcribe_file
             for w in sorted(d.glob("*_avse.wav")) if d.exists() else []:
                 k = f"{name}|{w.name[:-len('_avse.wav')]}"
                 if k not in res:
-                    res[k] = transcribe_file(w)
+                    res[k] = fn(w)
         self.jsave("transcripts.json", res)
 
     def hypotheses(self):
