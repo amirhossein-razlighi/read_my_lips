@@ -9,4 +9,6 @@ configs/paths.yaml
 /outputs/
 third_party/auto_avsr/
 third_party/av_hubert/
+third_party/usr2/
+third_party/vsr_multilang/
 *.egg-info/

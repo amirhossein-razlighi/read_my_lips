@@ -22,6 +22,16 @@ auto_avsr_dir: third_party/auto_avsr
 auto_avsr_vsr: checkpoints/auto_avsr/vsr_trlrwlrs2lrs3vox2avsp_base.pth
 auto_avsr_avsr: checkpoints/auto_avsr/avsr_trlrwlrs2lrs3vox2avsp_base.pth
 
+# other readers R (Sec. 5.5; --reader usr2 / vsr_multilang). Code: scripts/fetch_third_party.sh
+usr2_dir: third_party/usr2
+usr2_ckpt: checkpoints/usr2/usr2_huge_high_resource.pth
+# usr2_python: /abs/path/to/usr2-venv/bin/python   # optional: an interpreter with USR 2.0's requirements
+vsr_multilang_dir: third_party/vsr_multilang
+vsr_multilang_es: checkpoints/vsr_multilang/CMUMOSEAS_V_ES_WER44.5      # model.pth + model.json
+vsr_multilang_lm_es: checkpoints/vsr_multilang/lm_es
+vsr_multilang_fr: checkpoints/vsr_multilang/CMUMOSEAS_V_FR_WER58.6
+vsr_multilang_lm_fr: checkpoints/vsr_multilang/lm_fr
+
 # mouth ROI preparation (dlib; code: third_party/av_hubert)
 roi_prep_dir: third_party/av_hubert/avhubert/preparation
 dlib_face_predictor: checkpoints/dlib/shape_predictor_68_face_landmarks.dat

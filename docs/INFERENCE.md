@@ -54,7 +54,31 @@ speech has no evidence and neither votes nor can be selected. Ties go to the ear
 - `--no-lm-score`: skip the Gemma-4 language score of the candidates, which is computed for completeness and does
   not enter Eq. (3).
 
-The reader is replaceable without retraining (Sec. 5.5): any recogniser that writes the 10 best transcripts per window
-into `<out>/root/rml/reader_vsr.json` (`{"rows": [{"id": <window>, "nbest": [...]}]}`) can stand in for Auto-AVSR;
-run the remaining stages with `--stages whisper,lm,texts,encode,render,transcribe,evidence,select` after the
-`latents,roi,reader` stages (the audio-visual n-best and the visual evidence stay Auto-AVSR).
+## Other lip readers (Sec. 5.5)
+
+R enters the pipeline only through its 10 best transcripts, so it is replaced without retraining L or G
+(`--reader`; `scripts/fetch_third_party.sh` fetches the code, docs/CHECKPOINTS.md lists the weights):
+
+| `--reader` | R | Paper |
+|---|---|---|
+| `auto_avsr` (default for English) | visual Auto-AVSR on the dlib mouth ROI (`rml/reader/auto_avsr.py`) | Tab. 2-5 |
+| `usr2` | USR 2.0 Huge (high-resource), lips only, the official demo's MediaPipe mouth crop of the window, beam 40 (`rml/reader/usr2.py`) | Tab. 2, 3, "Ours (USR 2.0 as R)" |
+| `vsr_multilang` (default for `--language es/fr`) | the CMU-MOSEAS Spanish or French reader of Ma et al. with its language model, on the dlib mouth ROI (`rml/reader/vsr_multilang.py`) | Tab. 5b |
+
+```bash
+uv run python scripts/rml_infer.py --video talk.mp4 --start 12.0 --reader usr2 --out outputs/talk_usr2
+uv run python scripts/rml_infer.py --video habla.mp4 --language es --span 1.2,2.05 --out outputs/habla
+```
+
+With every reader, the audio-visual n-best that joins L's candidates on noisy input and the visual evidence e_R of the
+selection are Auto-AVSR's. With `usr2`, R -> G on silenced input renders with the main LoRA and
+`<inpaint>\nTranscript: h1` (the stage-1 LoRA was trained on Auto-AVSR readings); every other configuration is the
+table above. With `--language es` or `fr` (recipe `multilingual`), the input must hold a silenced span and the
+pipeline runs R -> L -> G alone (main LoRA, `<inpaint>\nTranscript: y_L`, cfg 5; Whisper in that language for the
+context and the transcripts), with no selection. USR 2.0 and the Ma et al. readers run in a subprocess
+(`python -m rml.reader.usr2`, `python -m rml.reader.vsr_multilang`); set `usr2_python` in configs/paths.yaml to an
+interpreter with USR 2.0's requirements (docs/INSTALL.md).
+
+Any other recogniser can stand in the same way: write its 10 best transcripts per window into
+`<out>/root/rml/reader_vsr.json` (`{"rows": [{"id": <window>, "nbest": [...]}]}`) and run the remaining stages
+with `--stages whisper,lm,texts,encode,render,transcribe,evidence,select` after `latents,roi,reader`.

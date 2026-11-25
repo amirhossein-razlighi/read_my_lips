@@ -23,6 +23,15 @@ Recipes (which numbers each one produced):
   hard    Tab. 4: the main LoRA for every configuration (R -> G kept: '<inpaint>\nTranscript: h1'; G alone kept on
           noisy input: the main LoRA)
   grid    Fig. 4: as hard; the evidence hears the 16 kHz input track instead of its audio-VAE reconstruction
+  multilingual  Tab. 5b (Spanish, French): silenced input only, R -> L -> G alone (main LoRA, '<inpaint>\nTranscript:
+          y_L', cfg 5), no muted twin, no selection
+
+Readers R (Sec. 5.5; only R changes, L and G are not retrained):
+  auto_avsr      visual Auto-AVSR (rml/reader/auto_avsr.py), the paper's R
+  usr2           USR 2.0 (rml/reader/usr2.py), "USR 2.0 as R" of Tab. 2 and 3. R -> G on silenced input then renders with
+                 the main LoRA, '<inpaint>\nTranscript: h1' (the stage-1 LoRA was trained on Auto-AVSR readings)
+  vsr_multilang  the Spanish / French readers of Ma et al. (rml/reader/vsr_multilang.py), Tab. 5b
+With every reader, the audio-visual n-best of noisy inputs and the visual evidence e_R are Auto-AVSR's.
 
 Stages (each resumable, each writes under the root): latents, roi, reader, whisper, lm, texts, encode, render,
 transcribe, evidence, select.
@@ -32,6 +41,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 from rml.lm.rows import clean_txt, denoise_answer, denoise_row, inpaint_answer, inpaint_row, merged
@@ -50,7 +60,9 @@ CONFIGS = {
 }
 SINGLE_LORA = {"inp_lip": "g_main_lora", "den_av": "g_main_lora"}   # recipes hard and grid
 SPAN_SCORED = ("inp_gemma", "inp_lip")   # recipe tables: transcribed as the span scorer does (Pipeline.transcribe)
-RECIPES = ("tables", "hard", "grid")
+RECIPES = ("tables", "hard", "grid", "multilingual")
+READERS = ("auto_avsr", "usr2", "vsr_multilang")
+REPO = Path(__file__).resolve().parents[1]
 STAGES = ("latents", "roi", "reader", "whisper", "lm", "texts", "encode", "render", "transcribe", "evidence", "select")
 
 
@@ -81,10 +93,20 @@ def add_muted_twins(rows):
     return out
 
 
+def run_reader_process(module, args, rows, out, python=None):
+    """a third-party reader in its own process (each ships an `espnet` package of its own)"""
+    rows_json = Path(out).with_suffix(".rows.json")
+    rows_json.write_text(json.dumps(rows, ensure_ascii=False))
+    subprocess.run([str(python or sys.executable), "-m", module, *map(str, args), "--rows", str(rows_json),
+                    "--out", str(out)], check=True, cwd=REPO)
+    return json.loads(Path(out).read_text())["rows"]
+
+
 class Pipeline:
-    def __init__(self, root: Path, paths, device="cuda", recipe="tables"):
+    def __init__(self, root: Path, paths, device="cuda", recipe="tables", reader="auto_avsr"):
         assert recipe in RECIPES, recipe
-        self.root, self.P, self.device, self.recipe = Path(root), paths, device, recipe
+        assert reader in READERS, reader
+        self.root, self.P, self.device, self.recipe, self.reader_name = Path(root), paths, device, recipe, reader
         self.meta = json.loads((self.root / "metadata.json").read_text())["clips"]
         self.by_id = {r["id"]: r for r in self.meta}
         self.work = self.root / "rml"
@@ -118,6 +140,16 @@ class Pipeline:
     def roi(self, base_id):
         return self.work / "roi" / "roi" / f"{base_id}.avi"
 
+    def cascade_lip(self):
+        """R -> G on silenced input with the stage-1 LoRA ('Transcript: h1'): Tab. 2 recipe with Auto-AVSR as R"""
+        return self.recipe == "tables" and self.reader_name == "auto_avsr"
+
+    def lora(self, name):
+        lora = CONFIGS[name][2]
+        if self.recipe != "tables" or (name == "inp_lip" and not self.cascade_lip()):
+            lora = SINGLE_LORA.get(name, lora)
+        return lora
+
     # ------------------------------------------------------------------ stages
     def latents(self):
         from rml.data.latents import encode_root
@@ -132,14 +164,34 @@ class Pipeline:
         """R: VSR 10-best per window; Auto-AVSR AV n-best per noisy sample and per muted twin"""
         from rml.reader.auto_avsr import read_rows
         if self.jload("reader_vsr.json") is None:
-            rows = [{"id": w, "roi": self.roi(w)} for w in sorted(self.windows())]
-            self.jsave("reader_vsr.json", {"rows": read_rows(rows, self.P.auto_avsr_dir, self.P.auto_avsr_vsr, "vsr",
-                                                             device=self.device)})
+            wins = sorted(self.windows().items())
+            if self.reader_name == "usr2":
+                try:
+                    python = self.P.usr2_python
+                except KeyError:
+                    python = None
+                rows = [{"id": w, "video": str(self.root / r["clip"])} for w, r in wins]
+                nb = run_reader_process("rml.reader.usr2", ["--usr2-dir", self.P.usr2_dir, "--ckpt", self.P.usr2_ckpt,
+                                                            "--device", self.device],
+                                        rows, self.work / "reader_vsr.usr2.json", python)
+            elif self.reader_name == "vsr_multilang":
+                rows = [{"id": w, "roi": str(self.roi(w)), "language": r.get("language", "en")} for w, r in wins]
+                models = []
+                for lang in sorted({x["language"] for x in rows}):
+                    models += ["--model", f"{lang}={getattr(self.P, f'vsr_multilang_{lang}')},"
+                                          f"{getattr(self.P, f'vsr_multilang_lm_{lang}')}"]
+                nb = run_reader_process("rml.reader.vsr_multilang",
+                                        ["--vsr-dir", self.P.vsr_multilang_dir, *models, "--device", self.device],
+                                        rows, self.work / "reader_vsr.vsr_multilang.json")
+            else:
+                rows = [{"id": w, "roi": self.roi(w)} for w, _ in wins]
+                nb = read_rows(rows, self.P.auto_avsr_dir, self.P.auto_avsr_vsr, "vsr", device=self.device)
+            self.jsave("reader_vsr.json", {"reader": self.reader_name, "rows": nb})
         if self.jload("reader_av.json") is None:
             rows = [{"id": r["id"], "roi": self.roi(r["base_id"]), "wav": self.input_wav(r["id"])}
                     for r in self.rows("denoise", "muted")]
             self.jsave("reader_av.json", {"rows": read_rows(rows, self.P.auto_avsr_dir, self.P.auto_avsr_avsr, "avsr",
-                                                            device=self.device)})
+                                                            device=self.device) if rows else []})
 
     def whisper(self):
         """audible context of every silenced sample; Whisper's transcript of every noisy sample and muted twin"""
@@ -207,7 +259,9 @@ class Pipeline:
             if k == "inpaint":
                 g = clean_txt(ans[sid]) if self.recipe == "grid" else ans[sid]
                 T["inp_gemma"][sid] = "<inpaint>\nTranscript: " + g
-                if self.recipe == "tables":
+                if self.recipe == "multilingual":
+                    continue
+                if self.cascade_lip():
                     first = next((words_of(t) for t in h if words_of(t)), "")
                     T["inp_lip"][sid] = f"Transcript: {first}"
                 else:
@@ -241,12 +295,10 @@ class Pipeline:
     def render(self):
         from rml.generator.render import render
         T = self.jload("texts.json")
-        for name, (_key, _k, lora, cfg) in CONFIGS.items():
-            if self.recipe != "tables":
-                lora = SINGLE_LORA.get(name, lora)
+        for name, (_key, _k, _lora, cfg) in CONFIGS.items():
             ids = sorted(T[name])
             if ids:
-                render(self.root, ids, getattr(self.P, lora), f"conditions_{name}", self.work / "renders" / name,
+                render(self.root, ids, getattr(self.P, self.lora(name)), f"conditions_{name}", self.work / "renders" / name,
                        transformer_path=self.P.ltx_transformer, text_encoder_path=self.P.ltx_text_encoder,
                        audio_vae_path=self.P.ltx_audio_vae, text_cfg=cfg, steps=30, seed=42)
 
@@ -259,9 +311,10 @@ class Pipeline:
             d = self.work / "renders" / name
             fn = transcribe_file_words if self.recipe == "tables" and name in SPAN_SCORED else transcribe_file
             for w in sorted(d.glob("*_avse.wav")) if d.exists() else []:
-                k = f"{name}|{w.name[:-len('_avse.wav')]}"
+                sid = w.name[:-len('_avse.wav')]
+                k = f"{name}|{sid}"
                 if k not in res:
-                    res[k] = fn(w)
+                    res[k] = fn(w, language=self.by_id.get(sid, {}).get("language", "en"))
         self.jsave("transcripts.json", res)
 
     def hypotheses(self):
@@ -282,6 +335,9 @@ class Pipeline:
         return out
 
     def evidence(self, with_lm=True):
+        if self.recipe == "multilingual":
+            print("multilingual recipe: no selection (Tab. 5b reports the fixed configurations)", flush=True)
+            return
         from rml.selection.evidence import score_spec
         spec = {}
         for sid, h in self.hypotheses().items():
@@ -293,6 +349,12 @@ class Pipeline:
         score_spec(spec, self.P.evidence_models(), self.work / "output_scores.json", self.device, with_lm=with_lm)
 
     def select(self):
+        if self.recipe == "multilingual":
+            tx = self.jload("transcripts.json", {})
+            res = {r["id"]: {"choice": "gemma|keep", "name": "R -> L -> G", "transcript": tx.get(f"inp_gemma|{r['id']}"),
+                             "wav": str(self.work / "renders/inp_gemma" / f"{r['id']}_avse.wav")} for r in self.evaluated()}
+            self.jsave("selection.json", res)
+            return res
         from rml.selection.rule import NAME, select
         sc = self.jload("output_scores.json")
         cfg_of = {(v[0], v[1]): k for k, v in CONFIGS.items()}

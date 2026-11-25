@@ -9,6 +9,11 @@ silenced span (<inpaint>), otherwise the track is treated as noisy speech (<deno
   python scripts/rml_infer.py --video talk.mp4 --start 12.0 --out outputs/talk
   python scripts/rml_infer.py --video talk.mp4 --span 1.20,2.05 --out outputs/talk      (known silenced span)
   python scripts/rml_infer.py --video talk.mp4 --task denoise --out outputs/talk        (noisy speech)
+  python scripts/rml_infer.py --video talk.mp4 --reader usr2 --out outputs/talk_usr2      (USR 2.0 as R, Sec. 5.5)
+  python scripts/rml_infer.py --video habla.mp4 --language es --span 1.2,2.05 --out outputs/habla
+
+--language es|fr replaces R by the reader of Ma et al. for that language and runs R -> L -> G on the silenced span
+(Tab. 5b; L and G unchanged, no selection). Noisy speech is English only.
 
 Needs one 80 GB GPU (G is a 22B transformer; L and the scorers run one at a time). Paths: configs/paths.yaml.
 """
@@ -24,7 +29,7 @@ from rml.data.audio_video import load_audio_window
 from rml.data.silence import find_silenced_regions, pick_gap
 from rml.data.windows import make_window
 from rml.paths import load_paths
-from rml.pipeline import STAGES, Pipeline, add_muted_twins, mux
+from rml.pipeline import READERS, STAGES, Pipeline, add_muted_twins, mux
 
 
 def main():
@@ -35,11 +40,20 @@ def main():
     ap.add_argument("--span", default=None, help="silenced span 'start,end' in seconds from the window start")
     ap.add_argument("--task", choices=["auto", "inpaint", "denoise"], default="auto")
     ap.add_argument("--no-crop", action="store_true", help="the video is already a 4.8 s 768x512 face window")
+    ap.add_argument("--language", choices=["en", "es", "fr"], default="en")
+    ap.add_argument("--reader", choices=READERS, default=None,
+                    help="lip reader R (default: auto_avsr for English, vsr_multilang for es/fr)")
     ap.add_argument("--stages", default=",".join(STAGES), help="comma list (resume a run from a stage)")
     ap.add_argument("--no-lm-score", action="store_true",
                     help="skip the Gemma-4 language score of the candidates (it does not enter the selection rule)")
     ap.add_argument("--paths", default=None, help="paths config (default configs/paths.yaml)")
     a = ap.parse_args()
+    reader = a.reader or ("auto_avsr" if a.language == "en" else "vsr_multilang")
+    if (reader == "vsr_multilang") != (a.language != "en"):
+        raise SystemExit("vsr_multilang reads Spanish and French; auto_avsr and usr2 read English")
+    multilingual = a.language != "en"
+    if multilingual and a.task == "denoise":
+        raise SystemExit("Spanish and French: silenced spans only")
     P = load_paths(a.paths)
     P.export_env()
     name = a.video.stem
@@ -61,15 +75,15 @@ def main():
             gap = pick_gap(find_silenced_regions(y, 16000), len(y) / 16000)
             if gap is not None:
                 task, span = "inpaint", [round(gap[0], 3), round(gap[1], 3)]
-            elif task == "inpaint":
-                raise SystemExit("--task inpaint but no silenced span was detected: give it with --span")
+            elif task == "inpaint" or multilingual:
+                raise SystemExit("no silenced span was detected: give it with --span")
             else:
                 task = "denoise"
-        row = {"id": f"{name}__{task}", "clip": f"clips/{name}.mp4", "base_id": name, "language": "en", "task": task,
-               "mask_segments_s": [span] if span else []}
-        meta.write_text(json.dumps({"clips": add_muted_twins([row])}, indent=1))
+        row = {"id": f"{name}__{task}", "clip": f"clips/{name}.mp4", "base_id": name, "language": a.language,
+               "task": task, "mask_segments_s": [span] if span else []}
+        meta.write_text(json.dumps({"clips": [row] if multilingual else add_muted_twins([row])}, indent=1))
         print(f"task {task}" + (f", silenced span {span[0]:.3f}-{span[1]:.3f} s" if span else ""), flush=True)
-    pipe = Pipeline(root, P)
+    pipe = Pipeline(root, P, recipe="multilingual" if multilingual else "tables", reader=reader)
     pipe.run([s for s in a.stages.split(",") if s], with_lm=not a.no_lm_score)
     sel = pipe.jload("selection.json")
     sid, res = next(iter(sel.items()))
@@ -77,7 +91,8 @@ def main():
     mux(clip, Path(res["wav"]), out_mp4)
     result = {"sample": sid, "task": pipe.by_id[sid]["task"], "span_s": pipe.by_id[sid]["mask_segments_s"],
               "transcript": res["transcript"], "configuration": res["name"], "output": str(out_mp4),
-              "candidates": pipe.jload("output_scores.json")[sid]["hyp"]}
+              "reader": reader,
+              "candidates": pipe.hypotheses()[sid] if multilingual else pipe.jload("output_scores.json")[sid]["hyp"]}
     (a.out / f"{name}_result.json").write_text(json.dumps(result, indent=1, ensure_ascii=False))
     print(json.dumps(result, indent=1, ensure_ascii=False))
 
