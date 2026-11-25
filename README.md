@@ -25,7 +25,7 @@ on the noisy hard set, where it also hears the noisy audio.
 ```bash
 git clone <this repository> read_my_lips && cd read_my_lips
 uv sync                                  # Python 3.12, torch 2.9.1 (CUDA 12.8), the LTX-2 packages in packages/
-bash scripts/fetch_third_party.sh        # Auto-AVSR and the mouth-ROI recipe at the pinned commits
+bash scripts/fetch_third_party.sh        # Auto-AVSR, the mouth-ROI recipe and the other readers at pinned commits
 bash scripts/download_checkpoints.sh     # checkpoints -> checkpoints/ (docs/CHECKPOINTS.md)
 cp configs/paths.example.yaml configs/paths.yaml   # edit if your checkpoints live elsewhere
 ```
@@ -45,7 +45,8 @@ force the task with `--task denoise`. One 80 GB GPU. See [docs/INFERENCE.md](doc
 
 `benchmarks/` holds the test sets of the paper as text manifests (ids, source videos and window starts, silenced
 spans, reviewed references; no media). `scripts/run_benchmark.py` runs the pipeline on one of them and
-`scripts/make_tables.py` regenerates Tab. 2, 3, 4, 5a and Fig. 4 from the per-sample results. See
+`scripts/make_tables.py` regenerates Tab. 2, 3, 4, 5a, 5b and Fig. 4 from the per-sample results, including the rows with
+USR 2.0 as the lip reader (`--reader usr2`) and the Spanish and French set. See
 [docs/EVALUATION.md](docs/EVALUATION.md).
 
 ## Training
@@ -72,6 +73,7 @@ the third-party models (LTX-2.5, Gemma-4, Auto-AVSR, Whisper large-v3, dlib, Med
 ## Licence
 
 Our code is MIT-licensed ([LICENSE](LICENSE)). `packages/` is the LTX-2 monorepo of Lightricks under its own licence;
-Auto-AVSR (Apache-2.0) and the AV-HuBERT preparation code are fetched into `third_party/` under theirs
+Auto-AVSR (Apache-2.0), the AV-HuBERT preparation code, USR 2.0 (MIT) and the multilingual lip readers of Ma et al.
+are fetched into `third_party/` under theirs
 ([third_party/README.md](third_party/README.md)). The model weights follow the licences of their bases (LTX-2.5,
 Gemma-4). Please read the limitations and responsible-use section of the paper (Appendix F) before use.

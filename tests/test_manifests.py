@@ -21,3 +21,14 @@ def test_cut_rows_are_consistent():
         k, s = r["n_masked_words"], r["span_start_index"]
         assert [w[0] for w in r["window_words"]][s:s + k] == r["masked_words"]
         assert r["id"].startswith(r["base_id"])
+
+
+def test_spanish_french_set_matches_table_6():
+    r = rows("silenced_talkvid_esfr")
+    assert len(r) == 431 and len({x["base_id"] for x in r}) == 431 and len({x["video"] for x in r}) == 76
+    assert sum(x["language"] == "es" for x in r) == 334 and sum(x["language"] == "fr" for x in r) == 97
+    assert sum(x["asr_verified"] for x in r) == 401
+    assert {x["n_masked_words"] for x in r} == {1, 2, 3, 4}
+    for x in r:
+        k, s = x["n_masked_words"], x["span_start_index"]
+        assert [w[0] for w in x["window_words"]][s:s + k] == x["masked_words"]

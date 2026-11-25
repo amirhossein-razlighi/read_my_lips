@@ -43,5 +43,10 @@
   "file": "grid_voxmm.jsonl",
   "rows": 1999,
   "description": "condition grid (Fig. 4)"
+ },
+ "silenced_talkvid_esfr": {
+  "file": "silenced_talkvid_esfr.jsonl",
+  "rows": 431,
+  "description": "Spanish and French silenced cuts k=1..4, one per window (Tab. 5b)"
  }
 }
