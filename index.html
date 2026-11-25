@@ -8,13 +8,13 @@
   <meta property="og:title" content="Read My Lips: Context-aware Lip Reading Using Language and Audio-Visual Models">
   <meta property="og:description" content="A lip reader, a language model and an audio-visual generator collaborate to recover silenced and noisy speech, then select the most reliable reconstruction.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="assets/img/teaser.png">
+  <meta property="og:image" content="assets/img/og.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="color-scheme" content="light dark">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e4570f'/%3E%3Cpath d='M12 34c6-9 14-12 20-6 6-6 14-3 20 6-6 7-13 10-20 10s-14-3-20-10z' fill='%23fff'/%3E%3Cpath d='M16 34h32' stroke='%23e4570f' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <script>
     try { var t = localStorage.getItem("rml-theme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {}
@@ -25,28 +25,29 @@
 
   <header class="nav" id="top">
     <div class="nav-inner">
-      <a class="brand" href="#top" aria-label="Read My Lips, back to top"><span class="brand-mark" aria-hidden="true"></span>RML</a>
-      <nav aria-label="Sections">
-        <a href="#abstract">Abstract</a>
-        <a href="#method">Method</a>
-        <a href="#samples">Samples</a>
-        <a href="#baselines">Baselines</a>
-        <a href="#selection">Selection</a>
-        <a href="#results">Results</a>
-        <a href="#bibtex">BibTeX</a>
+      <a class="brand" href="#top" aria-label="Read My Lips, back to top">Read My Lips</a>
+      <nav class="secnav" aria-label="Sections">
+        <a href="#abstract" data-sec="abstract"><span>Abstract</span><i><b></b></i></a>
+        <a href="#method" data-sec="method"><span>Method</span><i><b></b></i></a>
+        <a href="#samples" data-sec="samples"><span>Samples</span><i><b></b></i></a>
+        <a href="#baselines" data-sec="baselines"><span>Baselines</span><i><b></b></i></a>
+        <a href="#selection" data-sec="selection"><span>Selection</span><i><b></b></i></a>
+        <a href="#results" data-sec="results"><span>Results</span><i><b></b></i></a>
+        <a href="#bibtex" data-sec="bibtex"><span>BibTeX</span><i><b></b></i></a>
       </nav>
+      <span class="nav-current" id="navCurrent" aria-hidden="true"></span>
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
         <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>
         <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z"/></svg>
       </button>
     </div>
+    <div class="nav-progress" aria-hidden="true"><i data-sec="abstract"><b></b></i><i data-sec="method"><b></b></i><i data-sec="samples"><b></b></i><i data-sec="baselines"><b></b></i><i data-sec="selection"><b></b></i><i data-sec="results"><b></b></i><i data-sec="bibtex"><b></b></i></div>
   </header>
 
   <main id="main">
     <!-- ============================================================ HERO -->
     <section class="hero">
       <div class="wrap">
-        <p class="eyebrow">arXiv 2611.33117 · cs.GR · 2026</p>
         <h1><span class="title-main">Read My Lips</span><span class="title-sub">Context-aware Lip Reading Using Language and Audio-Visual Models</span></h1>
         <p class="authors" id="authors"></p>
         <p class="affils" id="affils"></p>
@@ -61,7 +62,7 @@
         </div>
 
         <figure class="teaser">
-          <img src="assets/img/teaser.png" width="2080" height="560" alt="Figure 1 of the paper. Left: inputs vary in acoustic noise, the number of missing words and visual readability. Right: two words cut from a sentence are filled back in as 'candle out', and a sentence drowned in babble is recovered as 'so you want to develop your answer'.">
+          <div class="fig-panel"><img class="only-light" src="assets/img/teaser.png" width="2056" height="566" alt="Figure 1 of the paper. Left: inputs vary in acoustic noise, the number of missing words and visual readability. Right: two words cut from a sentence are filled back in as 'candle out', and a sentence drowned in babble is recovered as 'so you want to develop your answer'."><img class="only-dark" src="assets/img/teaser-dark.png" width="2056" height="566" alt="" aria-hidden="true" loading="lazy"></div>
           <figcaption><strong>Read My Lips recovers a variety of corruptions in audio</strong> by using a combination of a lip reader, a language model, and an audio-visual generator. <em>Left:</em> the inputs vary in how damaged the audio is, how many words are affected, and how hard the lips are to read. <em>Right:</em> when two words are cut from the audio (orange), RML fills them in; when the whole clip is drowned in babble noise (blue), it recovers the sentence from the lips.</figcaption>
         </figure>
       </div>
@@ -69,7 +70,7 @@
 
     <!-- ============================================================ ABSTRACT -->
     <section id="abstract" class="section">
-      <div class="wrap narrow">
+      <div class="wrap">
         <h2>Abstract</h2>
         <p class="abstract">Real-world speech is often partially observable: audio may be missing or corrupted by noise and competing speakers, while the speaker's lips remain visible. Recovering speech requires combining what can be heard, seen, and inferred from context. We introduce RML (Read My Lips), a collaborative method combining a lip reader, a language model, and an audio-visual generative model. The lip reader provides articulation hypotheses, the language model uses context to resolve ambiguous or missing words, and the audio-visual generator reconstructs synchronized speech while preserving speaker identity. Since source reliability varies, RML generates multiple reconstructions and uses the available evidence to favor the most reliable ones. This allows RML to handle missing audio, strong interference, and poor visual evidence without manually defined thresholds. Quantitative and qualitative experiments across these conditions show the benefit of combining visual, acoustic, and linguistic signals.</p>
       </div>
@@ -81,7 +82,7 @@
         <h2>How it works</h2>
         <p class="lede">Three models, each suited to one kind of evidence, talk to each other in plain text. Because the interfaces are text, any lip reader can be dropped in, including one for another language, without retraining the rest.</p>
         <figure class="figure-card">
-          <div class="scroll-x"><img src="assets/img/pipeline.svg" width="1000" height="336" alt="Pipeline: the lip reader R produces a 10-best list of readings; a speech recognizer transcribes the audible context; the language model L picks a reading and edits it with the context; the audio-visual generator G synthesizes speech from the video, an audio track and the text; six outputs, one per configuration, go to the test-time selection."></div>
+          <div class="fig-panel scroll-x"><img class="only-light" src="assets/img/pipeline.svg" width="1000" height="336" alt="Pipeline: the lip reader R produces a 10-best list of readings; a speech recognizer transcribes the audible context; the language model L picks a reading and edits it with the context; the audio-visual generator G synthesizes speech from the video, an audio track and the text; six outputs, one per configuration, go to the test-time selection."><img class="only-dark" src="assets/img/pipeline-dark.svg" width="1000" height="336" alt="" aria-hidden="true" loading="lazy"></div>
           <figcaption><strong>Pipeline.</strong> The lip reader and the speech recognizer are frozen; the language model and the generator are adapted with LoRA. RML runs several configurations of this pipeline and selects one output per clip.</figcaption>
         </figure>
         <div class="steps">
@@ -113,12 +114,11 @@
     <section id="samples" class="section">
       <div class="wrap">
         <h2>Samples</h2>
-        <p class="lede">Each card plays the same picture with a different soundtrack. Switch between the <strong>input</strong> RML receives, <strong>RML</strong>'s output and the <strong>ground truth</strong>. Switching keeps the playback position, so you can compare the same moment. Transcripts are Whisper large-v3's reading of each track.</p>
+        <p class="lede">Each card plays one picture with three soundtracks: the <strong>original</strong> recording, the damaged <strong>input</strong> RML receives, and <strong>ours</strong>. Tap a transcript to switch; playback keeps its position, so you hear the same moment. Transcripts are Whisper large-v3&rsquo;s reading of each track.</p>
         <div class="legend-line" aria-hidden="true">
+          <span><i class="strip-demo"><i class="blk ok"></i><i class="blk ok"></i><i class="blk sub"></i><i class="blk del"></i><i class="blk ok"></i></i>one block per word: correct, wrong, missing</span>
           <span><i class="lg lg-span"></i>silenced or damaged words</span>
-          <span><i class="lg lg-err"></i>wrong word</span>
-          <span><i class="lg lg-del"></i>missing word</span>
-          <span><i class="lg lg-band"></i>silenced region on the timeline</span>
+          <span><i class="lg lg-band"></i>silenced region</span>
         </div>
 
         <div class="feature" id="films">
@@ -159,7 +159,7 @@
     <section id="baselines" class="section alt">
       <div class="wrap">
         <h2>Against the baselines</h2>
-        <p class="lede">The same clips through the closest prior systems. Pick a clip, then switch the soundtrack between methods; the picture stays the same.</p>
+        <p class="lede">The same clips through the closest prior systems. Pick a clip, then switch the soundtrack between methods. The picture stays the same, and each strip shows which words a method got right.</p>
         <div class="tabs" role="tablist" aria-label="Baseline comparisons" id="blTabs">
           <button role="tab" aria-selected="true" aria-controls="bl-babble" id="tb-babble" data-tab="babble">Babble −20 dB</button>
           <button role="tab" aria-selected="false" aria-controls="bl-noise" id="tb-noise" data-tab="noise" tabindex="-1">Talker &amp; sound effects</button>
@@ -255,7 +255,7 @@
 
     <!-- ============================================================ BIBTEX -->
     <section id="bibtex" class="section">
-      <div class="wrap narrow">
+      <div class="wrap">
         <h2>BibTeX</h2>
         <div class="bib">
           <button class="copy" type="button" id="copyBib">Copy</button>
@@ -268,10 +268,6 @@
   url     = {https://arxiv.org/abs/2611.33117}
 }</code></pre>
         </div>
-
-        <h2 class="ack-h">Acknowledgements</h2>
-        <!-- ACKNOWLEDGEMENTS: replace this paragraph with the final text -->
-        <p class="ack placeholder">Acknowledgements will be added here.</p>
       </div>
     </section>
   </main>
