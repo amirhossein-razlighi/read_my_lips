@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Read My Lips</title>
+  <meta name="description" content="Read My Lips (RML): context-aware lip reading with a lip reader, a language model and an audio-visual generator that together recover silenced and noisy speech.">
+  <meta property="og:title" content="Read My Lips: Context-aware Lip Reading Using Language and Audio-Visual Models">
+  <meta property="og:description" content="A lip reader, a language model and an audio-visual generator collaborate to recover silenced and noisy speech, then select the most reliable reconstruction.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/img/teaser.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e4570f'/%3E%3Cpath d='M12 34c6-9 14-12 20-6 6-6 14-3 20 6-6 7-13 10-20 10s-14-3-20-10z' fill='%23fff'/%3E%3Cpath d='M16 34h32' stroke='%23e4570f' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script>
+    try { var t = localStorage.getItem("rml-theme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav" id="top">
+    <div class="nav-inner">
+      <a class="brand" href="#top" aria-label="Read My Lips, back to top"><span class="brand-mark" aria-hidden="true"></span>RML</a>
+      <nav aria-label="Sections">
+        <a href="#abstract">Abstract</a>
+        <a href="#method">Method</a>
+        <a href="#samples">Samples</a>
+        <a href="#baselines">Baselines</a>
+        <a href="#selection">Selection</a>
+        <a href="#results">Results</a>
+        <a href="#bibtex">BibTeX</a>
+      </nav>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
+        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>
+        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============================================================ HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <p class="eyebrow">arXiv 2611.33117 · cs.GR · 2026</p>
+        <h1><span class="title-main">Read My Lips</span><span class="title-sub">Context-aware Lip Reading Using Language and Audio-Visual Models</span></h1>
+        <p class="authors" id="authors"></p>
+        <p class="affils" id="affils"></p>
+        <p class="affil-note" id="affilNote" hidden></p>
+        <div class="links">
+          <a class="btn" href="https://arxiv.org/pdf/2611.33117"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.8h8.2L19 7.6v13.6H6z"/><path d="M14 2.8v5h5M9 12.5h7M9 16h7"/></svg>Paper</a>
+          <a class="btn" href="https://arxiv.org/abs/2611.33117"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"/></svg>arXiv</a>
+          <a class="btn" href="https://github.com/amirhossein-razlighi/read_my_lips"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>Code</a>
+          <!-- HUGGING FACE: replace href="#" with the model / demo URL and delete the data-placeholder attribute -->
+          <a class="btn" href="#" data-placeholder="true" title="Coming soon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1.8 2 5.2 2 7 0"/><circle cx="9" cy="10" r=".6"/><circle cx="15" cy="10" r=".6"/></svg>Hugging Face <span class="soon">soon</span></a>
+          <a class="btn" href="#bibtex"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4H5v16h2M17 4h2v16h-2"/></svg>BibTeX</a>
+        </div>
+
+        <figure class="teaser">
+          <img src="assets/img/teaser.png" width="2080" height="560" alt="Figure 1 of the paper. Left: inputs vary in acoustic noise, the number of missing words and visual readability. Right: two words cut from a sentence are filled back in as 'candle out', and a sentence drowned in babble is recovered as 'so you want to develop your answer'.">
+          <figcaption><strong>Read My Lips recovers a variety of corruptions in audio</strong> by using a combination of a lip reader, a language model, and an audio-visual generator. <em>Left:</em> the inputs vary in how damaged the audio is, how many words are affected, and how hard the lips are to read. <em>Right:</em> when two words are cut from the audio (orange), RML fills them in; when the whole clip is drowned in babble noise (blue), it recovers the sentence from the lips.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============================================================ ABSTRACT -->
+    <section id="abstract" class="section">
+      <div class="wrap narrow">
+        <h2>Abstract</h2>
+        <p class="abstract">Real-world speech is often partially observable: audio may be missing or corrupted by noise and competing speakers, while the speaker's lips remain visible. Recovering speech requires combining what can be heard, seen, and inferred from context. We introduce RML (Read My Lips), a collaborative method combining a lip reader, a language model, and an audio-visual generative model. The lip reader provides articulation hypotheses, the language model uses context to resolve ambiguous or missing words, and the audio-visual generator reconstructs synchronized speech while preserving speaker identity. Since source reliability varies, RML generates multiple reconstructions and uses the available evidence to favor the most reliable ones. This allows RML to handle missing audio, strong interference, and poor visual evidence without manually defined thresholds. Quantitative and qualitative experiments across these conditions show the benefit of combining visual, acoustic, and linguistic signals.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ METHOD -->
+    <section id="method" class="section alt">
+      <div class="wrap">
+        <h2>How it works</h2>
+        <p class="lede">Three models, each suited to one kind of evidence, talk to each other in plain text. Because the interfaces are text, any lip reader can be dropped in, including one for another language, without retraining the rest.</p>
+        <figure class="figure-card">
+          <div class="scroll-x"><img src="assets/img/pipeline.svg" width="1000" height="336" alt="Pipeline: the lip reader R produces a 10-best list of readings; a speech recognizer transcribes the audible context; the language model L picks a reading and edits it with the context; the audio-visual generator G synthesizes speech from the video, an audio track and the text; six outputs, one per configuration, go to the test-time selection."></div>
+          <figcaption><strong>Pipeline.</strong> The lip reader and the speech recognizer are frozen; the language model and the generator are adapted with LoRA. RML runs several configurations of this pipeline and selects one output per clip.</figcaption>
+        </figure>
+        <div class="steps">
+          <article class="step">
+            <span class="step-tag">R</span>
+            <h3>Lip reader</h3>
+            <p>An off-the-shelf visual speech recognizer (Auto-AVSR) reads the whole clip and returns its <em>N</em>-best list. Lower-ranked readings often hold the right words even when the top one is wrong, so the full list is kept.</p>
+          </article>
+          <article class="step">
+            <span class="step-tag">L</span>
+            <h3>Language model</h3>
+            <p>A fine-tuned Gemma reads the lip-reading hypotheses next to a transcript of what is still audible. It first names the closest reading, then rewrites the clip's transcript from it, using the context to settle what the lips leave ambiguous.</p>
+          </article>
+          <article class="step">
+            <span class="step-tag">G</span>
+            <h3>Audio-visual generator</h3>
+            <p>LTX-2.5 with LoRA adapters attends to the video, the input track and the text, and generates speech that is synchronized with the lips and keeps the speaker's voice. It was trained on fallible transcripts, so it treats the text as a strong but fallible hint.</p>
+          </article>
+          <article class="step">
+            <span class="step-tag sel">✓</span>
+            <h3>Test-time selection</h3>
+            <p>Each configuration switches components on or off and optionally replaces the damaged audio with silence. Every output is transcribed, and the one with the lowest expected disagreement (minimum Bayes risk) against evidence-weighted voters is kept: the ear (Whisper) and the eye (the lip reader) decide how much each vote counts.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ SAMPLES -->
+    <section id="samples" class="section">
+      <div class="wrap">
+        <h2>Samples</h2>
+        <p class="lede">Each card plays the same picture with a different soundtrack. Switch between the <strong>input</strong> RML receives, <strong>RML</strong>'s output and the <strong>ground truth</strong>. Switching keeps the playback position, so you can compare the same moment. Transcripts are Whisper large-v3's reading of each track.</p>
+        <div class="legend-line" aria-hidden="true">
+          <span><i class="lg lg-span"></i>silenced or damaged words</span>
+          <span><i class="lg lg-err"></i>wrong word</span>
+          <span><i class="lg lg-del"></i>missing word</span>
+          <span><i class="lg lg-band"></i>silenced region on the timeline</span>
+        </div>
+
+        <div class="feature" id="films">
+          <div class="feature-head">
+            <span class="feature-kicker">In the wild</span>
+            <h3>Films</h3>
+            <p>Film scenes are far from the talking-head videos RML was trained on: the lighting is staged, the camera moves, and the face is often turned away. On these clips the lip reader alone gets the damaged words wrong.</p>
+          </div>
+          <div class="grid cards" id="filmCards"></div>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Sample categories" id="sampleTabs">
+          <button role="tab" aria-selected="true" aria-controls="tab-silenced" id="t-silenced" data-tab="silenced">Silenced words</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-noisy" id="t-noisy" data-tab="noisy" tabindex="-1">Noisy speech</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-silent" id="t-silent" data-tab="silent" tabindex="-1">Fully silent</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-generated" id="t-generated" data-tab="generated" tabindex="-1">Generated speakers</button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tab-silenced" aria-labelledby="t-silenced">
+          <p class="panel-note">From one to ten consecutive words are cut from the audio. Spans never start or end with a stop word, so the missing words carry content.</p>
+          <div class="grid cards" data-group="silenced"></div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tab-noisy" aria-labelledby="t-noisy" hidden>
+          <p class="panel-note">Babble at −5, −10 or −20 dB over the whole clip or over a few words, a competing talker, and sound effects from classes that were or were not seen in training. RML is not told where the noise is or how strong it is.</p>
+          <div class="grid cards" data-group="noisy"></div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tab-silent" aria-labelledby="t-silent" hidden>
+          <p class="panel-note">The audio track is removed altogether. With nothing audible, RML speaks what it reads from the lips, in a voice that fits the face.</p>
+          <div class="grid cards" data-group="silent"></div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tab-generated" aria-labelledby="t-generated" hidden>
+          <p class="panel-note">Speakers that were synthesized by a video generator, not filmed. These come from our hard test set.</p>
+          <div class="grid cards" data-group="generated"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ BASELINES -->
+    <section id="baselines" class="section alt">
+      <div class="wrap">
+        <h2>Against the baselines</h2>
+        <p class="lede">The same clips through the closest prior systems. Pick a clip, then switch the soundtrack between methods; the picture stays the same.</p>
+        <div class="tabs" role="tablist" aria-label="Baseline comparisons" id="blTabs">
+          <button role="tab" aria-selected="true" aria-controls="bl-babble" id="tb-babble" data-tab="babble">Babble −20 dB</button>
+          <button role="tab" aria-selected="false" aria-controls="bl-noise" id="tb-noise" data-tab="noise" tabindex="-1">Talker &amp; sound effects</button>
+          <button role="tab" aria-selected="false" aria-controls="bl-silenced" id="tb-silenced" data-tab="silenced" tabindex="-1">Silenced words</button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="bl-babble" aria-labelledby="tb-babble">
+          <p class="panel-note">Babble 20 dB louder than the speech, over the whole clip. Clips 1–4 are where RML does best; clips 5–8, marked <span class="badge typical">typical</span>, sit at its median error, so they show what to expect on an average clip.</p>
+          <div class="compare" data-set="babble"></div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="bl-noise" aria-labelledby="tb-noise" hidden>
+          <p class="panel-note">A competing talker, or sound effects, at −5 dB over the whole clip.</p>
+          <div class="compare" data-set="noise"></div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="bl-silenced" aria-labelledby="tb-silenced" hidden>
+          <p class="panel-note">F5-TTS and AlignDiT receive our language model's transcript <em>and</em> the position of the span, which RML has to find on its own. LipVoicer synthesizes speech from the video alone.</p>
+          <div class="compare" data-set="silenced"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ SELECTION -->
+    <section id="selection" class="section">
+      <div class="wrap">
+        <h2>Candidates and selection</h2>
+        <p class="lede">RML does not know in advance whether to trust the audio, the lips or the context. It runs the pipeline in several configurations, transcribes every output, and keeps the one that disagrees least with the other readings, where each reading's vote is weighted by how much the clip's own audio and lips support it.</p>
+        <div class="formula" aria-label="Selection rule">
+          <div class="eq">θ<sup>⋆</sup> = arg min<sub>θ</sub> Σ<sub>y′</sub> exp(e(y′) / T) · d(y<sub>θ</sub>, y′)</div>
+          <div class="eq-legend">
+            <span><b>e(y)</b> = audio evidence + lip evidence: how much more likely a transcript is under the real input than under a silent track (ear, Whisper) or a frozen mouth (eye, lip reader)</span>
+            <span><b>d</b> = word error rate between two transcripts, averaged over both directions</span>
+            <span><b>T</b> = one temperature, set on the validation set and fixed everywhere</span>
+          </div>
+        </div>
+        <div class="explorer" id="explorer">
+          <div class="picker" id="selPicker" role="listbox" aria-label="Choose a clip"></div>
+          <div class="explorer-body">
+            <div class="explorer-player" id="selPlayer"></div>
+            <div class="explorer-side">
+              <p class="sel-summary" id="selSummary"></p>
+              <div class="table-wrap">
+                <table class="cand-table" id="selTable">
+                  <thead>
+                    <tr><th scope="col">Configuration</th><th scope="col">Transcript of its output</th><th scope="col" class="num" title="log p(text | input audio) − log p(text | silence), Whisper">Ear</th><th scope="col" class="num" title="log p(text | these lips) − log p(text | a frozen mouth), lip reader">Eye</th><th scope="col" class="num">Vote</th><th scope="col" class="num">Risk</th></tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <p class="fine">Ear and eye are evidence in nats. <em>Nested</em> voters do not vote separately: the lip reader's transcript (and R → G on silence, which only speaks it) is already contained in L's input, which reads the lip reader's whole N-best list. Text-only rows vote but cannot be chosen, since they are not speech. Rows without a play button are outputs whose audio is not included on this page.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ RESULTS -->
+    <section id="results" class="section alt">
+      <div class="wrap">
+        <h2>Results</h2>
+        <p class="lede">Every output is transcribed by Whisper large-v3 and scored against the reference, on videos never used for training. TalkVid is held out from the training source; VoxMM is a different source altogether.</p>
+
+        <div class="result">
+          <div class="result-text">
+            <h3>Silenced words</h3>
+            <p>The share of cuts in which <em>every</em> silenced word comes back exactly. The language model and the generator add to whatever lip reader they are given: with a stronger reader, RML is stronger too, with nothing retrained.</p>
+            <p>Speech editors that receive the same transcript, plus the position of the span, still recover fewer spans. Since the text is identical, the difference comes from the generator, which also sees the lips and hears the speech around the gap.</p>
+          </div>
+          <div class="chart" id="chartSilenced"></div>
+        </div>
+
+        <div class="result">
+          <div class="result-text">
+            <h3>Noisy speech</h3>
+            <p>Word error rate over the whole window (lower is better). Audio-only enhancers cannot help once the babble is as loud as the speech, and generators that read only the lips throw away the speech that is still audible. RML uses both and has the lowest error on average.</p>
+            <p>The one exception is a competing talker, the case audio-visual separation is designed for, where VisualVoice and RML are statistically tied.</p>
+          </div>
+          <div class="chart" id="chartNoisy"></div>
+        </div>
+
+        <div class="result">
+          <div class="result-text">
+            <h3>Hard-to-read lips</h3>
+            <p>Side views, occluded mouths, animated characters and generated speakers. Lip readers largely fail here, so the audible context does most of the work: RML recovers about three times as many silenced spans as the lip reader it starts from, and nearly halves the error of noisy input.</p>
+            <p class="fine">* scored only on clips where the method's face preprocessing succeeds.</p>
+          </div>
+          <div class="chart" id="chartHard"></div>
+        </div>
+
+        <div class="callout">
+          <strong>Where the remaining errors lie.</strong> Given the true transcript, the generator recovers 96.6% of the silenced spans. Almost all of the remaining gap is in the transcript, so better lip readers and language models translate directly into better speech.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ BIBTEX -->
+    <section id="bibtex" class="section">
+      <div class="wrap narrow">
+        <h2>BibTeX</h2>
+        <div class="bib">
+          <button class="copy" type="button" id="copyBib">Copy</button>
+<pre><code id="bibText">@article{razlighi2026readmylips,
+  title   = {Read My Lips: Context-aware Lip Reading Using Language and Audio-Visual Models},
+  author  = {Razlighi, Amir and Ning, Zhuo and Korem, Naomi Ken and Patel, Nisarg and
+             Chrysanthou, Yiorgos and Cohen-Or, Daniel and Mahdavi Amiri, Ali},
+  journal = {arXiv preprint arXiv:2611.33117},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2611.33117}
+}</code></pre>
+        </div>
+
+        <h2 class="ack-h">Acknowledgements</h2>
+        <!-- ACKNOWLEDGEMENTS: replace this paragraph with the final text -->
+        <p class="ack placeholder">Acknowledgements will be added here.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p>Videos are short excerpts shown for research purposes. Sample audio is the evaluated output of each method, unedited.</p>
+    </div>
+  </footer>
+
+  <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+  <script src="data/authors.js"></script>
+  <script src="data/samples.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
