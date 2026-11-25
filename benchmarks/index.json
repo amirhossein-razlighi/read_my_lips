@@ -1,0 +1,47 @@
+{
+ "silenced_talkvid_en": {
+  "file": "silenced_talkvid_en.jsonl",
+  "rows": 958,
+  "description": "silenced cuts k=1..10 (hard: 1, 3, 5)"
+ },
+ "silenced_voxmm": {
+  "file": "silenced_voxmm.jsonl",
+  "rows": 1424,
+  "description": "silenced cuts k=1..10 (hard: 1, 3, 5)"
+ },
+ "silenced_hard_en": {
+  "file": "silenced_hard_en.jsonl",
+  "rows": 119,
+  "description": "silenced cuts k=1..10 (hard: 1, 3, 5)"
+ },
+ "silenced_val_en": {
+  "file": "silenced_val_en.jsonl",
+  "rows": 373,
+  "description": "validation cuts"
+ },
+ "noisy_talkvid_en": {
+  "file": "noisy_talkvid_en.jsonl",
+  "rows": 570,
+  "description": "noisy windows, 5 conditions each"
+ },
+ "noisy_voxmm": {
+  "file": "noisy_voxmm.jsonl",
+  "rows": 795,
+  "description": "noisy windows, 5 conditions each"
+ },
+ "noisy_hard_en": {
+  "file": "noisy_hard_en.jsonl",
+  "rows": 220,
+  "description": "noisy windows, 5 conditions each"
+ },
+ "grid_talkvid_en": {
+  "file": "grid_talkvid_en.jsonl",
+  "rows": 1421,
+  "description": "condition grid (Fig. 4)"
+ },
+ "grid_voxmm": {
+  "file": "grid_voxmm.jsonl",
+  "rows": 1999,
+  "description": "condition grid (Fig. 4)"
+ }
+}
