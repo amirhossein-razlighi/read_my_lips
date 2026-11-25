@@ -4,9 +4,9 @@ __pycache__/
 .ruff_cache/
 .pytest_cache/
 configs/paths.yaml
-checkpoints/
-data/
-outputs/
+/checkpoints/
+/data/
+/outputs/
 third_party/auto_avsr/
 third_party/av_hubert/
 *.egg-info/
