@@ -71,7 +71,7 @@
   /* size */
   --content: 1120px;
   --gutter: 24px;
-  --measure: 70ch;
+  --measure: 100%;
   --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
@@ -201,8 +201,8 @@ figure { margin: 0; }
 .fig-panel img { width: 100%; height: auto; }
 .teaser { text-align: left; }
 .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.scroll-x img { min-width: 720px; }
-@media (max-width: 760px) { .teaser .fig-panel { overflow-x: auto; -webkit-overflow-scrolling: touch; } .teaser .fig-panel img { min-width: 680px; } }
+@media (max-width: 560px) { .scroll-x img { min-width: 640px; } }
+@media (max-width: 760px) { .teaser .fig-panel img { width: 100%; height: auto; } }
 figcaption { margin-top: var(--s-4); max-width: var(--measure); font-size: var(--fs-sm); line-height: 1.6; color: var(--ink-2); }
 figcaption strong { color: var(--ink); }
 
