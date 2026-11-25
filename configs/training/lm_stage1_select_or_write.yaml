@@ -1,0 +1,45 @@
+# Language model L, stage 1 of 3 (gemma_select_or_write_novis): from the base Gemma-4 12B, learn to name the best
+# candidate ('Pick: <letter>' or 'none') or write the missing words. The run ends at step 3000; the next stage
+# starts from ckpt_s03000.pt.
+# ${RML_*} placeholders are filled in by scripts/train/train_lm.py (see docs/TRAINING.md).
+run_name: gemma_select_or_write_novis
+init_from: null   # --init-from (ignored when resuming from <out>/last.pt)
+args:
+  data: "${RML_LM_STAGE12_DATA}"
+  keep-meta: "${RML_G_STAGE1_ROOT}/metadata.json"
+  select-write: true
+  aux-max-new: 64
+  lr-adapter: 2.0e-4
+  lr-lora: 1.0e-4
+  max-steps: 20000
+  warmup-steps: 1500
+  stop-at-step: 3000
+  eval-every: 500
+  keep-ckpts: "1500,3000"
+  reader-pool:                  # name=glob:weight; the FIRST reader is the one used for validation decodes
+    - "clean=${RML_LM_READERS}/autoavsr_vsr_clean_train_shard*.json:0.5"
+    - "down4=${RML_LM_READERS}/autoavsr_vsr_down4_train_shard*.json:0.15"
+    - "drop50=${RML_LM_READERS}/autoavsr_vsr_drop50_train_shard*.json:0.15"
+    - "avhubert=${RML_LM_READERS}/avhubert_vsr_train.json:0.2"
+# Shared by the three stages. Keys are train_vis2gemma.py flags; true = bare flag.
+  gap-dur-prompt: true
+  batch-size: 4
+  grad-accum: 4                 # effective batch 16
+  lora-r: 32                    # LoRA alpha = 2 r = 64 (fixed in the code)
+  lora-dropout: 0.1
+  lr-schedule: cosine           # cosine to 10% of the base LR over max-steps
+  patience: 100
+  save-every: 100
+  val-nbest: 5
+  ctx-word-drop: 0.15
+  cfd-schedule: "0:0.5,4000:0.3,7000:0.15"   # context full-drop curriculum (step:p)
+  time-mask-p: 0.5
+  time-mask-len: 4
+  feat-noise: 0.05
+  one-cut-per-window: true
+  chat-wrap: true
+  deterministic: true
+  seed: 0
+  eval-attn: sdpa
+  decode-batch: 8
+  reader-nbest-k: 10            # hypotheses shown per training row: uniform 1..10

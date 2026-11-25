@@ -1,0 +1,72 @@
+# Generator G, stage 1 of 3: silenced spans of 1..10 words (15,816 cuts, en/es/fr), each conditioned on the lip
+# reader's transcript ('Transcript: <Auto-AVSR VSR line>'). From the base LTX-2.5 22B dev transformer, 5,000 steps.
+# ${RML_*} placeholders are filled in by scripts/train/train_generator.sh (see docs/TRAINING.md).
+model:
+  model_path: "${RML_LTX_DIR}/diffusion_models/ltx-2.5-22b-dev-transformer-bf16.safetensors"
+  text_encoder_path: "${RML_LTX_DIR}/text_encoders/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors"
+  video_vae_path: "${RML_LTX_DIR}/vae/ltx-2.5-video-vae-bf16.safetensors"
+  audio_vae_path: "${RML_LTX_DIR}/vae/ltx-2.5-audio-vae-bf16.safetensors"
+  training_mode: "lora"
+
+lora:
+  rank: 64
+  alpha: 64
+  dropout: 0.0
+  target_modules:          # audio self-attn, audio text cross-attn, audio FF, video->audio attn; video pathway untouched
+    - "audio_attn1.to_k"
+    - "audio_attn1.to_q"
+    - "audio_attn1.to_v"
+    - "audio_attn1.to_out.0"
+    - "audio_attn2.to_k"
+    - "audio_attn2.to_q"
+    - "audio_attn2.to_v"
+    - "audio_attn2.to_out.0"
+    - "audio_ff.net.0.proj"
+    - "audio_ff.net.2"
+    - "video_to_audio_attn.to_k"
+    - "video_to_audio_attn.to_q"
+    - "video_to_audio_attn.to_v"
+    - "video_to_audio_attn.to_out.0"
+
+training_strategy:
+  name: "avse"
+  conditions_dir: "conditions_avsr_vsrfw_k10"
+  text_dropout_p: 0.1           # trains the unconditional branch for text CFG
+  gap_audio_loss_weight: 12.0   # loss weight lambda inside the silenced region
+  gap_audio_loss_margin_s: 0.06 # ... applied up to 60 ms beyond its edges
+
+optimization:
+  learning_rate: 5.0e-5         # default group; every LoRA module matches one of the groups below
+  learning_rate_groups:         # -> all trained parameters use 1e-4
+    "audio_attn": 1.0e-4
+    "audio_ff": 1.0e-4
+    "video_to_audio_attn": 1.0e-4
+  steps: 5000
+  batch_size: 2
+  gradient_accumulation_steps: 1
+  max_grad_norm: 1.0
+  optimizer_type: "adamw"
+  scheduler_type: "linear"
+  enable_gradient_checkpointing: true
+
+acceleration:
+  mixed_precision_mode: "bf16"
+  quantization: "int8-quanto"
+  load_text_encoder_in_8bit: false
+
+data:
+  preprocessed_data_root: "${RML_G_STAGE1_ROOT}"
+
+checkpoints:
+  interval: 125              # full training state every 125 steps (resumable)
+  keep_last_n: -1
+  save_training_state: "full"  # optimizer state too -> exact resume
+
+# The generic in-training validation sampler does not implement the AVSE layout (the trainer refuses it):
+# evaluate checkpoints with the repository's AVSE inference script.
+validation:
+  interval: null
+
+seed: 42
+output_dir: "${RML_OUT_DIR}/avse25_vsr_cascade_k1to10"
+# TensorBoard scalars are written to <output_dir>/tensorboard.
