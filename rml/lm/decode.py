@@ -39,10 +39,20 @@ def load_gemma(gemma_dir, device="cuda"):
     return tok, model
 
 
+def load_lm_checkpoint(ckpt) -> dict:
+    """{"lora": PEFT state dict, "args": training configuration} of L. The released checkpoint is
+    lm/adapter_model.safetensors with lm/config.json next to it; a trainer checkpoint (.pt) also loads."""
+    ckpt = Path(ckpt)
+    if ckpt.suffix == ".safetensors":
+        from safetensors.torch import load_file
+        return {"lora": load_file(str(ckpt)), "args": json.loads((ckpt.parent / "config.json").read_text())}
+    return torch.load(ckpt, map_location="cpu", weights_only=False)
+
+
 class LanguageModel:
     def __init__(self, gemma_dir, ckpt, device="cuda"):
         from peft import LoraConfig, get_peft_model, set_peft_model_state_dict
-        st = torch.load(ckpt, map_location="cpu", weights_only=False)
+        st = load_lm_checkpoint(ckpt)
         ta = st.get("args", {})
         for k, v in EXPECTED_ARGS.items():
             got = ta.get(k, {"full_window": False, "inject_mode": "prefix", "mcl_slots": 1}.get(k))

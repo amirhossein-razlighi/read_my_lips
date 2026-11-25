@@ -9,10 +9,11 @@ ltx_audio_vae: checkpoints/ltx-2.5/vae/ltx-2.5-audio-vae-bf16.safetensors
 ltx_video_vae: checkpoints/ltx-2.5/vae/ltx-2.5-video-vae-bf16.safetensors
 
 # Read My Lips checkpoints (docs/CHECKPOINTS.md)
-lm_checkpoint: checkpoints/read_my_lips/lm/ckpt_s01000.pt                       # L: Gemma-4 LoRA, select-then-edit
-g_main_lora: checkpoints/read_my_lips/g_multitask_text/lora_weights_step_02000.safetensors
-g_cascade_lora: checkpoints/read_my_lips/g_vsr_cascade/lora_weights_step_05000.safetensors
-g_restoration_lora: checkpoints/read_my_lips/g_multitask_restoration/lora_weights_step_03000.safetensors
+# (Hugging Face AmirHossein-razlighi/read-my-lips, fetched by scripts/download_checkpoints.sh)
+lm_checkpoint: checkpoints/read_my_lips/lm/adapter_model.safetensors           # L: Gemma-4 LoRA (lm/config.json beside it)
+g_main_lora: checkpoints/read_my_lips/generator/main/lora.safetensors
+g_cascade_lora: checkpoints/read_my_lips/generator/silenced_reader/lora.safetensors
+g_restoration_lora: checkpoints/read_my_lips/generator/noisy_keep/lora.safetensors
 
 # Gemma-4 12B (base of L and of the language score)
 gemma_dir: checkpoints/gemma-4-12B-it-qat-q4_0-unquantized
@@ -47,4 +48,5 @@ torch_home: checkpoints/torch            # torch hub cache holding snakers4_sile
 
 # evaluation data
 data_root: data                          # benchmark roots are built under <data_root>/<benchmark>
-noise_bank: data/noise_bank              # index.json + <type>_<split>.npy
+rml_data: data/read-my-lips-data         # Hugging Face dataset AmirHossein-razlighi/read-my-lips-data (scripts/download_data.sh)
+noise_bank: data/noise_bank              # index.json + <type>_<split>.npy (only to rebuild noisy inputs from scratch)

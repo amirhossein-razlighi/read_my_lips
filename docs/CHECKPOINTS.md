@@ -4,17 +4,19 @@ Default locations are those of `configs/paths.example.yaml` (under `checkpoints/
 
 ## Read My Lips
 
-The Hugging Face repository id is a placeholder until the release (`RML_HF` in scripts/download_checkpoints.sh).
+Our checkpoints are on Hugging Face: [AmirHossein-razlighi/read-my-lips](https://huggingface.co/AmirHossein-razlighi/read-my-lips)
+(`scripts/download_checkpoints.sh` fetches them into `checkpoints/read_my_lips/` and checks their `SHA256SUMS`).
 
 | Key | File | What it is |
 |---|---|---|
-| `lm_checkpoint` | `read_my_lips/lm/ckpt_s01000.pt` | L: LoRA (r 32) of Gemma-4 12B, select-then-edit, trained on silenced and noisy windows (Sec. 4.2, Appendix B.1) |
-| `g_main_lora` | `read_my_lips/g_multitask_text/lora_weights_step_02000.safetensors` | G, final stage (2,000 steps): every configuration except the two below |
-| `g_cascade_lora` | `read_my_lips/g_vsr_cascade/lora_weights_step_05000.safetensors` | G, first stage (5,000 steps): R -> G with the input audio kept, on silenced inputs |
-| `g_restoration_lora` | `read_my_lips/g_multitask_restoration/lora_weights_step_03000.safetensors` | G, second stage (3,000 steps): G alone with the noisy audio kept |
+| `lm_checkpoint` | `read_my_lips/lm/adapter_model.safetensors` (+ `lm/config.json`) | L: LoRA (r 32) of Gemma-4 12B, select-then-edit, trained on silenced and noisy windows (Sec. 4.2, Appendix B.1) |
+| `g_main_lora` | `read_my_lips/generator/main/lora.safetensors` | G, final stage: every configuration except the two below |
+| `g_cascade_lora` | `read_my_lips/generator/silenced_reader/lora.safetensors` | G, first stage: R -> G with the input audio kept, on silenced inputs |
+| `g_restoration_lora` | `read_my_lips/generator/noisy_keep/lora.safetensors` | G, second stage: G alone with the noisy audio kept |
 
 The three G checkpoints are the three training stages of Appendix B.1 (docs/TRAINING.md); docs/INFERENCE.md says
-which configuration renders with which.
+which configuration renders with which. `lm/config.json` holds L's LoRA shape and the decoding configuration the
+loader checks (`rml/lm/decode.py`); a trainer checkpoint `ckpt_s*.pt` (docs/TRAINING.md) loads the same way.
 
 ## Third-party models
 

@@ -28,9 +28,9 @@ L and G do not depend on each other's checkpoints, so the two chains can run in 
 
 The released system uses these checkpoints:
 
-| Checkpoint | Role |
-|---|---|
-| `avse25_multitask_text` step 2000 | main generator |
-| `avse25_vsr_cascade_k1to10` step 5000 | silenced R→G candidate |
-| `avse25_multitask_restoration` step 3000 | noisy candidate in which G keeps the audio |
-| `gemma_multitask_denoise_novis/ckpt_s01000.pt` | L |
+| Checkpoint | Role | Released as (Hugging Face `AmirHossein-razlighi/read-my-lips`) |
+|---|---|---|
+| `avse25_multitask_text` step 2000 | main generator | `generator/main/lora.safetensors` |
+| `avse25_vsr_cascade_k1to10` step 5000 | silenced R→G candidate | `generator/silenced_reader/lora.safetensors` |
+| `avse25_multitask_restoration` step 3000 | noisy candidate in which G keeps the audio | `generator/noisy_keep/lora.safetensors` |
+| `gemma_multitask_denoise_novis/ckpt_s01000.pt` | L | `lm/adapter_model.safetensors` + `lm/config.json` (its LoRA tensors and decoding configuration) |
