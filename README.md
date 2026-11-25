@@ -3,6 +3,8 @@
 Code for **Read My Lips: Context-aware Lip Reading Using Language and Audio-Visual Models** (arXiv
 [2611.33117](https://arxiv.org/abs/2611.33117)).
 
+**[Project page](https://amirhossein-razlighi.github.io/read_my_lips/)** · **[Paper](https://arxiv.org/abs/2611.33117)**
+
 Read My Lips (RML) recovers speech that was silenced or buried in noise. Three models communicate through plain text:
 a lip reader **R** (Auto-AVSR) proposes the 10 best transcripts of the whole clip, a language model **L** (Gemma-4 12B
 with a LoRA) chooses one and corrects it with the audible context, and an audio-visual generator **G** (LTX-2.5 22B with
