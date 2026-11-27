@@ -192,8 +192,6 @@ h1 { margin: 0; font-family: var(--display); font-weight: 700; letter-spacing: -
   transition: border-color .15s, background .15s; }
 .btn:hover { border-color: var(--ink-3); }
 .btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.btn[data-placeholder] { color: var(--ink-3); border-style: dashed; cursor: default; background: transparent; }
-.btn .soon { font-size: var(--fs-2xs); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); }
 
 /* figures: one panel style for the teaser and the pipeline */
 figure { margin: 0; }
